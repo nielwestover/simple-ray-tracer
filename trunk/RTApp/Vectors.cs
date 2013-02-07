@@ -3,6 +3,7 @@ using System;
 
 static class V
 {
+	public static int Vj = 3;
 	public static Point sumPV(Point P, Point V)//sum of Point and Vector
 	{
 		return new Point(P.x + V.xNorm, P.y + V.yNorm, P.z + V.zNorm, 0, 0, 0);
