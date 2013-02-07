@@ -21,34 +21,21 @@ namespace RTApp
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		double XRES = 400;
-		double YRES = 400;
-
-		Point Up = new Point(0, 0, 0, 0, 1, 0);
-		Point E = new Point(0, 0, 10, 0, 0, 0);
-		Point At = new Point(0, 0, -1, 0, 0, 0);
-		Point LS = new Point(500, 0, 300, 0, 0, 0);//800,0,-1000,0,0,0);
-		double Lu = 10;
-		double Lv = 10;
-		Point u, v, w;
+		
+		Bitmap bitmap, bitmap2;
 		const int numSpheres = 1;
 		Sphere[] spheres = new Sphere[numSpheres];
 		const int numTris = 1;
 		Tri[] tris = new Tri[numTris];
-		double Cu, Cv;
-		double ambient = .1;
-		double Pexp = 3;
-		double a, b, c;
-		Bitmap bitmap, bitmap2;
 		
 		bool obstructionBetween(Point A, Point ColorMe)
 		{
 			Point Ray = V.normalize(V.PDiff(A, ColorMe));
 			for (int k = 0; k < numSpheres; k++)
 			{
-				a = Ray.xNorm * Ray.xNorm + Ray.yNorm * Ray.yNorm + Ray.zNorm * Ray.zNorm;
-				b = 2 * ((ColorMe.x - spheres[k].x) * Ray.xNorm + (ColorMe.y - spheres[k].y) * Ray.yNorm + (ColorMe.z - spheres[k].z) * Ray.zNorm);
-				c = ((ColorMe.x - spheres[k].x) * (ColorMe.x - spheres[k].x) + (ColorMe.y - spheres[k].y) * (ColorMe.y - spheres[k].y) + (ColorMe.z - spheres[k].z) * (ColorMe.z - spheres[k].z) - spheres[k].radius * spheres[k].radius);
+				double a = Ray.xNorm * Ray.xNorm + Ray.yNorm * Ray.yNorm + Ray.zNorm * Ray.zNorm;
+				double b = 2 * ((ColorMe.x - spheres[k].x) * Ray.xNorm + (ColorMe.y - spheres[k].y) * Ray.yNorm + (ColorMe.z - spheres[k].z) * Ray.zNorm);
+				double c = ((ColorMe.x - spheres[k].x) * (ColorMe.x - spheres[k].x) + (ColorMe.y - spheres[k].y) * (ColorMe.y - spheres[k].y) + (ColorMe.z - spheres[k].z) * (ColorMe.z - spheres[k].z) - spheres[k].radius * spheres[k].radius);
 				//cout<<"OUT"<<endl;
 				if (b * b > 4 * a * c)
 				{
@@ -70,11 +57,11 @@ namespace RTApp
 				Point Aa = tris[k].pts[0];
 				Point B = tris[k].pts[1];
 				Point C = tris[k].pts[2];
-
+				int fe = V.Vj;
 				Point N = tris[k].triNormal(Aa);
 				//N.Print();
 				double D = -(N.xNorm * Aa.x) - (N.yNorm * Aa.y) - (N.zNorm * Aa.z);
-				double T2 = -(N.xNorm * E.x + N.yNorm * E.y + N.zNorm * E.z + D) / (N.xNorm * Ray.xNorm + N.yNorm * Ray.yNorm + N.zNorm * Ray.zNorm);
+				double T2 = -(N.xNorm * PP.E.x + N.yNorm * PP.E.y + N.zNorm * PP.E.z + D) / (N.xNorm * Ray.xNorm + N.yNorm * Ray.yNorm + N.zNorm * Ray.zNorm);
 
 				double T1 = V.dot(N, V.PDiff(Aa, ColorMe)) / V.dot(N, Ray);
 				if (T1 < .0001)
@@ -114,7 +101,7 @@ namespace RTApp
 			//P.Print();
 			//cout<<"N: ";
 			//N.Print();
-			Point L = V.normalize(V.PDiff(LS, P));
+			Point L = V.normalize(V.PDiff(PP.LS, P));
 			//cout<<"L: ";
 			//L.Print();
 			double LdotN = V.dot(L, N);
@@ -123,11 +110,11 @@ namespace RTApp
 			Point R = new Point(0, 0, 0, ACC.xNorm - L.xNorm, ACC.yNorm - L.yNorm, ACC.zNorm - L.zNorm);
 			//cout<<"R: ";
 			//R.Print();
-			double Ca = ambient + (1 - ambient) * LdotN;
+			double Ca = PP.ambient + (1 - PP.ambient) * LdotN;
 			//cout<<"Ca: "<<Ca<<endl;
-			double ACC2 = V.dot(V.normalize(R), V.normalize(V.PDiff(E, P)));
+			double ACC2 = V.dot(V.normalize(R), V.normalize(V.PDiff(PP.E, P)));
 			//cout<<"ACC2: "<<ACC2<<endl;
-			double Cs = Math.Pow(ACC2, Pexp);
+			double Cs = Math.Pow(ACC2, PP.Pexp);
 			//cout<<"Cs: "<<Cs<<endl;
 			double newR, newG, newB;
 			if (SI < 10)
@@ -152,24 +139,24 @@ namespace RTApp
 			//P.Print();
 			//cout<<"N: ";
 			//N.Print();
-			Point L = V.normalize(V.PDiff(LS, P));
+			Point L = V.normalize(V.PDiff(PP.LS, P));
 			//cout<<"L: ";
 			//L.Print();
 			double LdotN = V.dot(L, N);
 			//cout<<"LDOTN: "<<LdotN<<endl;
-			double Ca = ambient + (1 - ambient) * LdotN;
+			double Ca = PP.ambient + (1 - PP.ambient) * LdotN;
 			double newR, newG, newB;
 			if (SI < 10)
 			{
-				newR = ambient * spheres[SI].color.r;
-				newG = ambient * spheres[SI].color.g;
-				newB = ambient * spheres[SI].color.b;
+				newR = PP.ambient * spheres[SI].color.r;
+				newG = PP.ambient * spheres[SI].color.g;
+				newB = PP.ambient * spheres[SI].color.b;
 			}
 			else
 			{
-				newR = ambient * tris[SI - 10].color.r;
-				newG = ambient * tris[SI - 10].color.g;
-				newB = ambient * tris[SI - 10].color.b;
+				newR = PP.ambient * tris[SI - 10].color.r;
+				newG = PP.ambient * tris[SI - 10].color.g;
+				newB = PP.ambient * tris[SI - 10].color.b;
 			}
 			setPixelColor(i, j, newR, newG, newB);
 		}
@@ -185,24 +172,24 @@ namespace RTApp
 			//spheres[3] = new Sphere(-2, 10, -5, 2, 0, 1, 1);
 			tris[0] = new Tri(new Point(3, 4, 0), new Point(3, -4, 0), new Point(6, -4, 0), new RGB(0, 1,0));
 			//tris[1] = new Tri(new Point(2,2, -5), new Point(5, 7, -5), new Point(12, 12, -5), new RGB(.5, 1, 1));
-			Width = XRES;
-			Height = YRES;
+			Width = PP.XRES;
+			Height = PP.YRES;
 			//this.WindowState = WindowState.Maximized;
-			bitmap = new Bitmap((int)XRES, (int)YRES);
-			bitmap2 = new Bitmap((int)XRES, (int)YRES);
+			bitmap = new Bitmap((int)PP.XRES, (int)PP.YRES);
+			bitmap2 = new Bitmap((int)PP.XRES, (int)PP.YRES);
 
-			w = V.normalize(V.PDiff(At, E));
-			u = V.normalize(V.cross(w, Up));
-			v = V.cross(u, w);
+			Point w = V.normalize(V.PDiff(PP.At, PP.E));
+			Point u = V.normalize(V.cross(w, PP.Up));
+			Point v = V.cross(u, w);
 
-			for (int j = 0; j < YRES; j++)
+			for (int j = 0; j < PP.YRES; j++)
 			{
-				for (int i = 0; i < XRES; i++)
+				for (int i = 0; i < PP.XRES; i++)
 				{
-					double Cu = ((2.0 * (double)i + 1.0) / (2.0 * XRES) - .5) * Lu;
-					double Cv = -((2.0 * (double)j + 1.0) / (2.0 * YRES) - .5) * Lv;
-					Point Pij = V.sumPV(At, V.sumVV(V.vsMult(Cu, u), V.vsMult(Cv, v)));
-					Point Ray = V.normalize(V.PDiff(Pij, E));
+					double Cu = ((2.0 * (double)i + 1.0) / (2.0 * PP.XRES) - .5) * PP.Lu;
+					double Cv = -((2.0 * (double)j + 1.0) / (2.0 * PP.YRES) - .5) * PP.Lv;
+					Point Pij = V.sumPV(PP.At, V.sumVV(V.vsMult(Cu, u), V.vsMult(Cv, v)));
+					Point Ray = V.normalize(V.PDiff(Pij, PP.E));
 					//cout<<"RAY: "<<endl;
 					//Ray.Print();
 					int SI = -1;//sphereIndex
@@ -210,9 +197,9 @@ namespace RTApp
 					for (int k = 0; k < numSpheres; k++)
 					{
 						//calculate T for each sphere
-						a = Ray.xNorm * Ray.xNorm + Ray.yNorm * Ray.yNorm + Ray.zNorm * Ray.zNorm;
-						b = 2 * ((E.x - spheres[k].x) * Ray.xNorm + (E.y - spheres[k].y) * Ray.yNorm + (E.z - spheres[k].z) * Ray.zNorm);
-						c = ((E.x - spheres[k].x) * (E.x - spheres[k].x) + (E.y - spheres[k].y) * (E.y - spheres[k].y) + (E.z - spheres[k].z) * (E.z - spheres[k].z) - spheres[k].radius * spheres[k].radius);
+						double a = Ray.xNorm * Ray.xNorm + Ray.yNorm * Ray.yNorm + Ray.zNorm * Ray.zNorm;
+						double b = 2 * ((PP.E.x - spheres[k].x) * Ray.xNorm + (PP.E.y - spheres[k].y) * Ray.yNorm + (PP.E.z - spheres[k].z) * Ray.zNorm);
+						double c = ((PP.E.x - spheres[k].x) * (PP.E.x - spheres[k].x) + (PP.E.y - spheres[k].y) * (PP.E.y - spheres[k].y) + (PP.E.z - spheres[k].z) * (PP.E.z - spheres[k].z) - spheres[k].radius * spheres[k].radius);
 						//cout<<"OUT"<<endl;
 						if (b * b > 4 * a * c)
 						{
@@ -249,11 +236,11 @@ namespace RTApp
 						Point N = tris[k].triNormal(A);
 						//N.Print();
 						double D = -(N.xNorm * A.x) - (N.yNorm * A.y) - (N.zNorm * A.z);
-						double T2 = -(N.xNorm * E.x + N.yNorm * E.y + N.zNorm * E.z + D) / (N.xNorm * Ray.xNorm + N.yNorm * Ray.yNorm + N.zNorm * Ray.zNorm);
-						double T1 = V.dot(N, V.PDiff(A, E)) / V.dot(N, Ray);
-						if (j == YRES / 2 && i == XRES / 2)
+						double T2 = -(N.xNorm * PP.E.x + N.yNorm * PP.E.y + N.zNorm * PP.E.z + D) / (N.xNorm * Ray.xNorm + N.yNorm * Ray.yNorm + N.zNorm * Ray.zNorm);
+						double T1 = V.dot(N, V.PDiff(A, PP.E)) / V.dot(N, Ray);
+						if (j == PP.YRES / 2 && i == PP.XRES / 2)
  							Debug.Print("stop");
-						Point P = V.sumPV(E, V.vsMult(T1, Ray));
+						Point P = V.sumPV(PP.E, V.vsMult(T1, Ray));
 
 						Point v0 = V.PDiff(C, A);
 						Point v1 = V.PDiff(B, A);
@@ -283,14 +270,14 @@ namespace RTApp
 					}
 					if (T != 1000000000)
 					{
-						Point ColorMe = V.sumPV(E, V.vsMult(T, Ray));
-						bool obs = obstructionBetween(LS, ColorMe);
+						Point ColorMe = V.sumPV(PP.E, V.vsMult(T, Ray));
+						bool obs = obstructionBetween(PP.LS, ColorMe);
 						//cout<<"OBS: "<<obs<<endl;
 						Point N;
 						if (SI < 10)
 							N = V.normalize(spheres[SI].GetSphereNormal(ColorMe));
 						else
-							N = tris[SI - 10].triNormal(V.PDiff(E, tris[SI - 10].pts[0]));
+							N = tris[SI - 10].triNormal(V.PDiff(PP.E, tris[SI - 10].pts[0]));
 						if (!obs)
 							colorPoint(i, j, ColorMe, N, SI);
 						else
@@ -319,9 +306,9 @@ namespace RTApp
 
 		private void antialias(int p)
 		{
-			for (int j = 0; j < YRES; j++)
+			for (int j = 0; j < PP.YRES; j++)
 			{
-				for (int i = 0; i < XRES; i++)
+				for (int i = 0; i < PP.XRES; i++)
 				{
 					//if (j == 400 && i == 400)
 					//	Debug.Print("stop");
@@ -333,7 +320,7 @@ namespace RTApp
 					{
 						for (int n = 0; n < p; ++n)
 						{
-							if (j + m < XRES && i + n < YRES)
+							if (j + m < PP.XRES && i + n < PP.YRES)
 							{
 								Color c = bitmap.GetPixel(j + m, i + n);
 								r += c.R;
