@@ -29,6 +29,6 @@ class Sphere : Point
 
 	public Point GetSphereNormal(Point P)
 	{
-		return new Point(0, 0, 0, P.x - x, P.y - y, P.z - z);
+		return new Point(P.x - x, P.y - y, P.z - z);
 	}
 }
