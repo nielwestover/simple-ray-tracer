@@ -57,9 +57,9 @@ class Tri
 		double cos = V.dot(P, normal);
 		if (cos < 0)
 		{
-			normal.xNorm *= -1;
-			normal.yNorm *= -1;
-			normal.zNorm *= -1;
+			normal.x *= -1;
+			normal.y *= -1;
+			normal.z *= -1;
 		}
 		return V.normalize(normal);
 	}

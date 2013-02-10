@@ -58,6 +58,7 @@
     </ApplicationDefinition>
     <Compile Include="Parameters.cs" />
     <Compile Include="RGB.cs" />
+    <Compile Include="RT.cs" />
     <Compile Include="Sphere.cs" />
     <Compile Include="Tri.cs" />
     <Compile Include="Vectors.cs" />
