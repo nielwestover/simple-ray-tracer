@@ -1,7 +1,7 @@
 # Blender v242 OBJ File: cello.blend
 # www.blender3d.org
 mtllib cello.mtl
-o cello_body_cello_body
+o cello_body_cello_body 
 v -0.000014 -0.977415 -0.010724
 v -0.015459 -0.977114 -0.010725
 v -0.015456 -0.977120 -0.060929
