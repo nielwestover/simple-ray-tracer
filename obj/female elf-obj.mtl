@@ -1,0 +1,24 @@
+#
+# Wavefront material file: d:\backup\gotovi modeli\female elf\female elf-obj.mtl
+#
+# Converted by the PolyTrans geometry converter from Okino Computer Graphics, Inc.
+# Date/time of export: 02/23/2006 16:37:41
+#
+# Bounding box of geometry = (-44.969,173.056,-34.7647) to (53.9054,285.581,41.915).
+
+newmtl default
+	Ns 32
+	d 1
+	illum 2
+	Kd 0.4 0.4 0.4
+	Ks 0.7 0.7 0.7
+	Ka 0.3 0.3 0.3
+
+newmtl head
+	Ns 3
+	d 1
+	illum 2
+	Kd 0.513726 0.513726 0.513726
+	Ks 0.135 0.135 0.135
+	Ka 0.513726 0.513726 0.513726
+

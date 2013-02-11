@@ -31,6 +31,13 @@ public class Point
 		this.z = z;
 	}
 
+	public Point(Meshomatic.Vector3 v)
+	{
+		this.x = v.X;
+		this.y = v.Y;
+		this.z = v.Z;
+	}
+
 	public void Print()
 	{
 		string s = "";

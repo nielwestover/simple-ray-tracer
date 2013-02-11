@@ -1,0 +1,10 @@
+C:\Users\a2558\Documents\Visual Studio 2010\Projects\RTApp\Meshomatic\Meshomatic\bin\Debug\Meshomatic.dll
+C:\Users\a2558\Documents\Visual Studio 2010\Projects\RTApp\Meshomatic\Meshomatic\bin\Debug\Meshomatic.pdb
+C:\Users\a2558\Documents\Visual Studio 2010\Projects\RTApp\Meshomatic\Meshomatic\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\a2558\Documents\Visual Studio 2010\Projects\RTApp\Meshomatic\Meshomatic\obj\Debug\Meshomatic.dll
+C:\Users\a2558\Documents\Visual Studio 2010\Projects\RTApp\Meshomatic\Meshomatic\obj\Debug\Meshomatic.pdb
+C:\Users\a2558\Documents\Visual Studio 2010\Projects\RTApp\srt\Meshomatic\Meshomatic\bin\Debug\Meshomatic.dll
+C:\Users\a2558\Documents\Visual Studio 2010\Projects\RTApp\srt\Meshomatic\Meshomatic\bin\Debug\Meshomatic.pdb
+C:\Users\a2558\Documents\Visual Studio 2010\Projects\RTApp\srt\Meshomatic\Meshomatic\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\a2558\Documents\Visual Studio 2010\Projects\RTApp\srt\Meshomatic\Meshomatic\obj\Debug\Meshomatic.dll
+C:\Users\a2558\Documents\Visual Studio 2010\Projects\RTApp\srt\Meshomatic\Meshomatic\obj\Debug\Meshomatic.pdb
