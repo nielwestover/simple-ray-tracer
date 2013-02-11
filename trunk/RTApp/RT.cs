@@ -191,17 +191,31 @@ namespace RTApp
 			bitmap.SetPixel(x, y, Color.FromArgb(r, g, b));
 		}
 
-		public RT(){}
+		string objFile;
+		public RT(string objFile)
+		{
+			this.objFile = objFile;
+		}
 
 		private void LoadShapes()
 		{
-			spheres.Add(new Sphere(0, 0, -5, 4, 1, 0, 0));
-			//spheres[1] = new Sphere(3, 5, -5, 2, 0, 1, 0);
-			//spheres[1] = new Sphere(-4, 10, 0, 1, 0, 1, 0);
-			//spheres[2] = new Sphere(10, 10, 0, 3, 0, 0, 1);
-			//spheres[3] = new Sphere(-2, 10, -5, 2, 0, 1, 1);
-			tris.Add(new Tri(new Point(3, 4, 0), new Point(3, -4, 0), new Point(6, -4, 0), new RGB(0, 1, 0)));
-			//tris[1] = new Tri(new Point(2,2, -5), new Point(5, 7, -5), new Point(12, 12, -5), new RGB(.5, 1, 1));
+			Meshomatic.ObjLoader o = new Meshomatic.ObjLoader();
+			Meshomatic.MeshData md = o.LoadFile(objFile);
+			foreach (var item in md.Tris)
+			{
+				Point a = new Point(md.Vertices[item.P1.Vertex]);
+				Point b = new Point(md.Vertices[item.P2.Vertex]);
+				Point c = new Point(md.Vertices[item.P3.Vertex]);
+				tris.Add(new Tri(a, b, c, new RGB(1, .4, .2)));
+			}
+
+			//spheres.Add(new Sphere(0, 0, -5, 4, 1, 0, 0));
+			////spheres[1] = new Sphere(3, 5, -5, 2, 0, 1, 0);
+			////spheres[1] = new Sphere(-4, 10, 0, 1, 0, 1, 0);
+			////spheres[2] = new Sphere(10, 10, 0, 3, 0, 0, 1);
+			////spheres[3] = new Sphere(-2, 10, -5, 2, 0, 1, 1);
+			//tris.Add(new Tri(new Point(3, 4, 0), new Point(3, -4, 0), new Point(6, -4, 0), new RGB(0, 1, 0)));
+			////tris[1] = new Tri(new Point(2,2, -5), new Point(5, 7, -5), new Point(12, 12, -5), new RGB(.5, 1, 1));
 		}
 
 		internal System.Drawing.Bitmap GetRayTracedScene()
@@ -214,6 +228,8 @@ namespace RTApp
 
 			for (int j = 0; j < PP.YRES; j++)
 			{
+				System.Console.WriteLine((j + 1) + " of " + PP.YRES);
+				bitmap.Save("C:/Niel/obj/render.png");
 				for (int i = 0; i < PP.XRES; i++)
 				{
 					double Cu = ((2.0 * (double)i + 1.0) / (2.0 * PP.XRES) - .5) * PP.Lu;

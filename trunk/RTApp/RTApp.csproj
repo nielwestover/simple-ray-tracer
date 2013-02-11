@@ -101,6 +101,12 @@
     </None>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Meshomatic\Meshomatic\Meshomatic.csproj">
+      <Project>{D52F55A8-08E5-488E-AD0F-BF49B1F29A5F}</Project>
+      <Name>Meshomatic</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

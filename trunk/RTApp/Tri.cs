@@ -6,7 +6,7 @@ class Tri
 {
 
 	public int numPoints;
-	public Point[] pts = new Point[10];
+	public Point[] pts = new Point[3];
 	public RGB color;
 
 	public Tri()

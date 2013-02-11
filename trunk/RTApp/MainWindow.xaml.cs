@@ -29,22 +29,23 @@ namespace RTApp
 			//Height = PP.YRES;
 			//WindowState = WindowState.Maximized;
 
-			RT rt = new RT();
+			//RT rt = new RT("C:/Niel/obj/cello.obj");
+			RT rt = new RT("C:/Niel/obj/female elf-obj.obj");
 			Bitmap bitmap = rt.GetRayTracedScene();
-			Bitmap bitmap2 = rt.AntialiasedScene(3);
+			//Bitmap bitmap2 = rt.AntialiasedScene(3);
 
 			image.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
 			bitmap.GetHbitmap(),
 			IntPtr.Zero,
 			Int32Rect.Empty,
 			BitmapSizeOptions.FromEmptyOptions());
+			bitmap.Save("C:/Niel/obj/render.png");
 
-			image2.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-			bitmap2.GetHbitmap(),
-			IntPtr.Zero,
-			Int32Rect.Empty,
-			BitmapSizeOptions.FromEmptyOptions());
-			bitmap.Save("C:/Users/a2558/Documents/mybitmap.bmp");
+// 			image2.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+// 			bitmap2.GetHbitmap(),
+// 			IntPtr.Zero,
+// 			Int32Rect.Empty,
+// 			BitmapSizeOptions.FromEmptyOptions());
 		}
 
 		
