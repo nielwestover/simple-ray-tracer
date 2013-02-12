@@ -5,9 +5,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Image x:Name="image" Grid.Column="0"/>
-        <Image x:Name="image2" Grid.Column="1"/>
     </Grid>
 </Window>
