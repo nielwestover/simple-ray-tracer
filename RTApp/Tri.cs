@@ -2,6 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+using System;
 class Tri
 {
 
@@ -48,12 +49,36 @@ class Tri
 	public Point triNormal(Point P)
 	{
 		//outputs the normal vector of these 3
+		//Point normal;
+		//Point P1 = pts[0];
+		//Point P2 = pts[1];
+		//Point P3 = pts[2];
+		//normal = V.cross(V.PDiff(P3, P1), V.PDiff(P2, P1));
+
+		//double cos = V.dot(P, normal);
+		//if (cos < 0)
+		//{
+		//    normal.x *= -1;
+		//    normal.y *= -1;
+		//    normal.z *= -1;
+		//}
+
 		Point normal;
 		Point P1 = pts[0];
 		Point P2 = pts[1];
 		Point P3 = pts[2];
-		normal = V.cross(V.PDiff(P3, P1), V.PDiff(P2, P1));
+		double t1 = Math.Abs(V.VLength(V.cross(V.PDiff(P, P2), V.PDiff(P, P3))));
+		double t2 = Math.Abs(V.VLength(V.cross(V.PDiff(P, P3), V.PDiff(P, P1))));
+		double t3 = Math.Abs(V.VLength(V.cross(V.PDiff(P, P2), V.PDiff(P, P1))));
+		double total = t1 + t2 + t3;
+		double p1 = t1 / total;
+		double p2 = t2 / total;
+		double p3 = t3 / total;
 
+		Point N1 = V.vsMult(p1, new Point(P1.nx, P1.ny, P1.nz));
+		Point N2 = V.vsMult(p2, new Point(P2.nx, P2.ny, P2.nz));
+		Point N3 = V.vsMult(p3, new Point(P3.nx, P3.ny, P3.nz));
+		normal = V.sumVV(N3, V.sumVV(N1, N2));
 		double cos = V.dot(P, normal);
 		if (cos < 0)
 		{
