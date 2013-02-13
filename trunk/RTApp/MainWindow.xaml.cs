@@ -29,9 +29,10 @@ namespace RTApp
 			//Height = PP.YRES;
 			//WindowState = WindowState.Maximized;
 
-			//RT rt = new RT("C:/Niel/obj/cello.obj");
+			RT rt = new RT("C:/Niel/obj/cello.obj");
 			//RT rt = new RT("C:/Niel/obj/female elf-obj.obj");
-			RT rt = new RT("C:/Niel/obj/test.obj");
+			//RT rt = new RT("C:/Niel/obj/elf-test.obj");
+			//RT rt = new RT("C:/Niel/obj/test.obj");
 			Bitmap bitmap = rt.GetRayTracedScene();
 			//Bitmap bitmap2 = rt.AntialiasedScene(3);
 

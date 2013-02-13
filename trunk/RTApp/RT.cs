@@ -334,7 +334,7 @@ namespace RTApp
 				if (SI < 10)
 					N = V.normalize(spheres[SI].GetSphereNormal(ColorMe));
 				else
-					N = tris[SI - 10].triNormal(V.PDiff(PP.E, tris[SI - 10].pts[0]));
+					N = tris[SI - 10].triNormal(ColorMe);
 				if (!obs)
 					colorAtPixel = getColorAtPoint(i, j, ColorMe, N, SI);
 				else
