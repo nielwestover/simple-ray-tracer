@@ -25,15 +25,19 @@ namespace RTApp
 		{
 			InitializeComponent();
 
-			//Width = PP.XRES * 2;
-			//Height = PP.YRES;
-			//WindowState = WindowState.Maximized;
+			Width = Math.Max(PP.XRES, 200);
+			Height = Math.Max(PP.YRES, 200);
+			WindowState = WindowState.Normal;
+			System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+			sw.Start();
 
-			RT rt = new RT("C:/Niel/obj/cello.obj");
-			//RT rt = new RT("C:/Niel/obj/female elf-obj.obj");
+			//RT rt = new RT("C:/Niel/obj/cello.obj");
+			RT rt = new RT("C:/Niel/obj/female elf-obj.obj");
 			//RT rt = new RT("C:/Niel/obj/elf-test.obj");
 			//RT rt = new RT("C:/Niel/obj/test.obj");
 			Bitmap bitmap = rt.GetRayTracedScene();
+
+			System.Console.WriteLine("Elapsed: " + sw.ElapsedMilliseconds/1000 + " s");
 			//Bitmap bitmap2 = rt.AntialiasedScene(3);
 
 			image.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(

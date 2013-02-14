@@ -7,8 +7,10 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-class Sphere : Point
+class Sphere
 {
+	public Point center;
+	public RGB color;
 	public double radius;
 
 	public Sphere()
@@ -18,9 +20,9 @@ class Sphere : Point
 
 	public Sphere(double Xc, double Yc, double Zc, double rad, double r, double g, double b)
 	{
-		x = Xc;
-		y = Yc;
-		z = Zc;
+		center.x = Xc;
+		center.y = Yc;
+		center.z = Zc;
 		radius = rad;
 		color.r = r;
 		color.g = g;
@@ -29,6 +31,6 @@ class Sphere : Point
 
 	public Point GetSphereNormal(Point P)
 	{
-		return new Point(P.x - x, P.y - y, P.z - z);
+		return new Point(P.x - center.x, P.y - center.y, P.z - center.z);
 	}
 }
