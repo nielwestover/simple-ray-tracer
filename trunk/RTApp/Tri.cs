@@ -10,6 +10,13 @@ class Tri
 	public Point[] pts = new Point[3];
 	public RGB color;
 
+	//cache these - the same every time we do barycentric coords
+	Point v0;
+	Point v1;
+	double d00;
+	double d01;
+	double d11;
+	double invDenom;
 	public Tri()
 	{
 		numPoints = 0;
@@ -21,6 +28,13 @@ class Tri
 		add(P2);
 		add(P3);
 		color = c;
+
+		v0 = V.PDiff(pts[1], pts[0]);
+		v1 = V.PDiff(pts[2], pts[0]);
+		d00 = V.dot(v0, v0);
+		d01 = V.dot(v0, v1);
+		d11 = V.dot(v1, v1);
+		invDenom = 1.0 / (d00 * d11 - d01 * d01);
 	}
 
 	public void add(Point P)
@@ -73,17 +87,12 @@ class Tri
 			normal = V.cross(V.PDiff(P2, P1), V.PDiff(P3, P1));
 			return normal;
 		}
-		double t1 = Math.Abs(V.VLength(V.cross(V.PDiff(P2, P), V.PDiff(P3, P))));
-		double t2 = Math.Abs(V.VLength(V.cross(V.PDiff(P3, P), V.PDiff(P1, P))));
-		double t3 = Math.Abs(V.VLength(V.cross(V.PDiff(P1, P), V.PDiff(P2, P))));
-		double total = t1 + t2 + t3;
-		double p1 = t1 / total;
-		double p2 = t2 / total;
-		double p3 = t3 / total;
+		UVW bc = getBarycentricCoordsAtPoint(P);
 
-		Point N1 = V.vsMult(p1, new Point(P1.nx, P1.ny, P1.nz));
-		Point N2 = V.vsMult(p2, new Point(P2.nx, P2.ny, P2.nz));
-		Point N3 = V.vsMult(p3, new Point(P3.nx, P3.ny, P3.nz));
+		//Scale each normal by its barycentric value, add them all together, then normalize.  Voila - normal at point P
+		Point N1 = V.vsMult(bc.u, new Point(P1.nx, P1.ny, P1.nz));
+		Point N2 = V.vsMult(bc.v, new Point(P2.nx, P2.ny, P2.nz));
+		Point N3 = V.vsMult(bc.w, new Point(P3.nx, P3.ny, P3.nz));
 		normal = V.sumVV(N3, V.sumVV(N1, N2));
 		//double cos = V.dot(P, normal);
 		//if (cos < 0)
@@ -93,6 +102,40 @@ class Tri
 		//    normal.z *= -1;
 		//}
 		return V.normalize(normal);
+	}
+
+	public struct UVW
+	{
+		public double u;
+		public double v;
+		public double w;
+	}
+
+	public UVW getBarycentricCoordsAtPoint(Point P)
+	{
+		//Point P1 = pts[0];
+		//Point P2 = pts[1];
+		//Point P3 = pts[2];
+
+		//double t1 = Math.Abs(V.VLength(V.cross(V.PDiff(P2, P), V.PDiff(P3, P))));
+		//double t2 = Math.Abs(V.VLength(V.cross(V.PDiff(P3, P), V.PDiff(P1, P))));
+		//double t3 = Math.Abs(V.VLength(V.cross(V.PDiff(P1, P), V.PDiff(P2, P))));
+		//double total = t1 + t2 + t3;
+		//double p1 = t1 / total;
+		//double p2 = t2 / total;
+		//double p3 = t3 / total;
+
+		//return new Tuple<double, double, double>(p1, p2, p3);
+		
+		Point v2 = V.PDiff(P, pts[0]);
+
+		double d20 = V.dot(v2, v0);
+		double d21 = V.dot(v2, v1);
+		double vC = (d11 * d20 - d01 * d21) * invDenom;
+		double wC = (d00 * d21 - d01 * d20) * invDenom;
+		double uC = 1.0f - vC - wC;
+
+		return new UVW {u = uC, v=vC, w=wC };
 	}
 // 	public Point triNormal2(Point P)
 // 	{

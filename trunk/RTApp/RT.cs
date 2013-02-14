@@ -19,19 +19,16 @@ namespace RTApp
 			for (int k = 0; k < spheres.Count; k++)
 			{
 				double a = Ray.x * Ray.x + Ray.y * Ray.y + Ray.z * Ray.z;
-				double b = 2 * ((ColorMe.x - spheres[k].x) * Ray.x + (ColorMe.y - spheres[k].y) * Ray.y + (ColorMe.z - spheres[k].z) * Ray.z);
-				double c = ((ColorMe.x - spheres[k].x) * (ColorMe.x - spheres[k].x) + (ColorMe.y - spheres[k].y) * (ColorMe.y - spheres[k].y) + (ColorMe.z - spheres[k].z) * (ColorMe.z - spheres[k].z) - spheres[k].radius * spheres[k].radius);
-				//cout<<"OUT"<<endl;
+				double b = 2 * ((ColorMe.x - spheres[k].center.x) * Ray.x + (ColorMe.y - spheres[k].center.y) * Ray.y + (ColorMe.z - spheres[k].center.z) * Ray.z);
+				double c = ((ColorMe.x - spheres[k].center.x) * (ColorMe.x - spheres[k].center.x) + (ColorMe.y - spheres[k].center.y) * (ColorMe.y - spheres[k].center.y) + (ColorMe.z - spheres[k].center.z) * (ColorMe.z - spheres[k].center.z) - spheres[k].radius * spheres[k].radius);
 				if (b * b > 4 * a * c)
 				{
 					double squareRt = Math.Sqrt(b * b - 4 * a * c);
-					//cout<<"IN"<<endl;
 					double T1 = (-b + squareRt) / (2 * a);
 					double T2 = (-b - squareRt) / (2 * a);
 
 					if (T1 > 0.1 || T2 > 0.1)
 					{
-						//cout<<"SPHERE: "<<T1<<"   "<<T2<<endl;
 						return true;
 					}
 				}
@@ -52,24 +49,8 @@ namespace RTApp
 					continue;
 				Point P = V.sumPV(ColorMe, V.vsMult(T1, Ray));
 
-				Point v0 = V.PDiff(C, Aa);
-				Point v1 = V.PDiff(B, Aa);
-				Point v2 = V.PDiff(P, Aa);
-
-				// Compute dot products
-				double dot00 = V.dot(v0, v0);
-				double dot01 = V.dot(v0, v1);
-				double dot02 = V.dot(v0, v2);
-				double dot11 = V.dot(v1, v1);
-				double dot12 = V.dot(v1, v2);
-
-				// Compute barycentric coordinates
-				double invDenom = 1.0 / (dot00 * dot11 - dot01 * dot01);
-				double uC = (dot11 * dot02 - dot01 * dot12) * invDenom;
-				double vC = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-				// Check if point is in triangle
-				if ((uC >= 0) && (vC >= 0) && (uC + vC < 1))
+				Tri.UVW bc = tris[k].getBarycentricCoordsAtPoint(P);
+				if ((bc.v >= 0) && (bc.w >= 0) && (bc.v + bc.w < 1.0))
 				{
 					return true;
 				}
@@ -249,18 +230,18 @@ namespace RTApp
 			Point Ray = V.normalize(V.PDiff(Pij, PP.E));
 
 			int SI = -1;//sphereIndex
-			double T = 1000000000;
+			double T = double.PositiveInfinity;
+
+			//calculate T for each sphere
 			for (int k = 0; k < spheres.Count; k++)
 			{
-				//calculate T for each sphere
 				double a = Ray.x * Ray.x + Ray.y * Ray.y + Ray.z * Ray.z;
-				double b = 2 * ((PP.E.x - spheres[k].x) * Ray.x + (PP.E.y - spheres[k].y) * Ray.y + (PP.E.z - spheres[k].z) * Ray.z);
-				double c = ((PP.E.x - spheres[k].x) * (PP.E.x - spheres[k].x) + (PP.E.y - spheres[k].y) * (PP.E.y - spheres[k].y) + (PP.E.z - spheres[k].z) * (PP.E.z - spheres[k].z) - spheres[k].radius * spheres[k].radius);
-				//cout<<"OUT"<<endl;
+				double b = 2 * ((PP.E.x - spheres[k].center.x) * Ray.x + (PP.E.y - spheres[k].center.y) * Ray.y + (PP.E.z - spheres[k].center.z) * Ray.z);
+				double c = ((PP.E.x - spheres[k].center.x) * (PP.E.x - spheres[k].center.x) + (PP.E.y - spheres[k].center.y) * (PP.E.y - spheres[k].center.y) + (PP.E.z - spheres[k].center.z) * (PP.E.z - spheres[k].center.z) - spheres[k].radius * spheres[k].radius);
+				
 				if (b * b > 4 * a * c)
 				{
 					double squareRt = Math.Sqrt(b * b - 4 * a * c);
-					//cout<<"IN"<<endl;
 					double T1 = (-b + squareRt) / (2 * a);
 					double T2 = (-b - squareRt) / (2 * a);
 
@@ -268,20 +249,15 @@ namespace RTApp
 					{
 						T = T1;
 						SI = k;
-						//cout<<"T: "<<T<<"    S: "<<SI<<endl;
 					}
 					else if (T2 > 0 && T2 <= T1 && T2 < T)
 					{
 						T = T2;
 						SI = k;
-						//cout<<"T: "<<T<<"    S: "<<SI<<endl;
 					}
-
-
 				}
 			}
 
-			//cout<<"FINAL T: "<<T<<"    FINAL S: "<<SI<<endl;
 			//compute T for Triangles as well here, find lowest T value
 			for (int k = 0; k < tris.Count; k++)
 			{
@@ -290,46 +266,25 @@ namespace RTApp
 				Point C = tris[k].pts[2];
 
 				Point N = tris[k].triNormal(A);
-				//N.Print();
-				double D = -(N.x * A.x) - (N.y * A.y) - (N.z * A.z);
-				double T2 = -(N.x * PP.E.x + N.y * PP.E.y + N.z * PP.E.z + D) / (N.x * Ray.x + N.y * Ray.y + N.z * Ray.z);
-				double T1 = V.dot(N, V.PDiff(A, PP.E)) / V.dot(N, Ray);
-				//if (j == PP.YRES / 2 && i == PP.XRES / 2)
-				//	Debug.Print("stop");
-				Point P = V.sumPV(PP.E, V.vsMult(T1, Ray));
+				double newT = V.dot(N, V.PDiff(A, PP.E)) / V.dot(N, Ray);
+				Point P = V.sumPV(PP.E, V.vsMult(newT, Ray));
 
-				Point v0 = V.PDiff(C, A);
-				Point v1 = V.PDiff(B, A);
-				Point v2 = V.PDiff(P, A);
-
-				// Compute dot products
-				double dot00 = V.dot(v0, v0);
-				double dot01 = V.dot(v0, v1);
-				double dot02 = V.dot(v0, v2);
-				double dot11 = V.dot(v1, v1);
-				double dot12 = V.dot(v1, v2);
-
-				// Compute barycentric coordinates
-				double invDenom = 1.0 / (dot00 * dot11 - dot01 * dot01);
-				double uC = (dot11 * dot02 - dot01 * dot12) * invDenom;
-				double vC = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-				// Check if point is in triangle
-				if ((uC >= 0) && (vC >= 0) && (uC + vC < 1.0))
+				Tri.UVW bc = tris[k].getBarycentricCoordsAtPoint(P);
+				if ((bc.v >= 0) && (bc.w >= 0) && (bc.v + bc.w < 1.0))
 				{
-					if (T1 < T)
+					//Closer than old T? Update T and index
+					if (newT < T)
 					{
-						T = T1;
+						T = newT;
 						SI = k + 10;
 					}
 				}
 			}
 			RGB colorAtPixel;
-			if (T != 1000000000)
+			if (T != double.PositiveInfinity)
 			{
 				Point ColorMe = V.sumPV(PP.E, V.vsMult(T, Ray));
 				bool obs = obstructionBetween(PP.LS, ColorMe);
-				//cout<<"OBS: "<<obs<<endl;
 				Point N;
 				if (SI < 10)
 					N = V.normalize(spheres[SI].GetSphereNormal(ColorMe));
