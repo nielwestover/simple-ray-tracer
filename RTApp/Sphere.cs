@@ -58,5 +58,15 @@ class Sphere : Shape
 		}
 		return T;
 	}
-	 
+	public override BBox getBounds()
+	{
+		bounds.xmin = center.x - radius;
+		bounds.xmax = center.x + radius;
+		bounds.ymin = center.y - radius;
+		bounds.ymax = center.y + radius;
+		bounds.zmin = center.z - radius;
+		bounds.zmax = center.z + radius;
+
+		return bounds;
+	}
 }

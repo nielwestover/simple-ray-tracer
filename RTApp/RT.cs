@@ -12,6 +12,7 @@ namespace RTApp
 {
 	public class RT
 	{
+		Node root = new Node();
 		List<Shape> shapes = new List<Shape>();
 		Bitmap bitmap = new Bitmap((int)PP.XRES, (int)PP.YRES);
 
@@ -63,7 +64,7 @@ namespace RTApp
 			return false;
 		}
 
-		RGB getColorAtPoint(int i, int j, Point P, Point N, int SI)
+		RGB getColorAtPoint(int i, int j, Point P, Point N, Shape winner)
 		{
 			Point L = V.normalize(V.PDiff(PP.LS, P));
 			double LdotN = V.dot(L, N);
@@ -72,22 +73,23 @@ namespace RTApp
 			double Ca = PP.ambient + (1 - PP.ambient) * LdotN;
 			double ACC2 = V.dot(V.normalize(R), V.normalize(V.PDiff(PP.E, P)));
 			double Cs = Math.Pow(ACC2, PP.Pexp);
-			
-			double newR = (Ca * shapes[SI].color.r + (1 - Ca * shapes[SI].color.r) * Cs);
-			double newG = (Ca * shapes[SI].color.g + (1 - Ca * shapes[SI].color.g) * Cs);
-			double newB = (Ca * shapes[SI].color.b + (1 - Ca * shapes[SI].color.b) * Cs);
-			
+
+			double newR = (Ca * winner.color.r + (1 - Ca * winner.color.r) * Cs);
+			double newG = (Ca * winner.color.g + (1 - Ca * winner.color.g) * Cs);
+			double newB = (Ca * winner.color.b + (1 - Ca * winner.color.b) * Cs);
+
 			return new RGB(newR, newG, newB);
 
 		}
-		RGB getAmbientColor(int i, int j, Point P, Point N, int SI)
+
+		RGB getAmbientColor(int i, int j, Point P, Point N, Shape winner)
 		{
 			Point L = V.normalize(V.PDiff(PP.LS, P));
 			double LdotN = V.dot(L, N);
 			double Ca = PP.ambient + (1 - PP.ambient) * LdotN;
-			double newR = Ca * shapes[SI].color.r;
-			double newG = Ca * shapes[SI].color.g;
-			double newB = Ca * shapes[SI].color.b;
+			double newR = Ca * winner.color.r;
+			double newG = Ca * winner.color.g;
+			double newB = Ca * winner.color.b;
 			return new RGB(newR, newG, newB);
 		}
 
@@ -147,21 +149,100 @@ namespace RTApp
 		{
 			Meshomatic.ObjLoader o = new Meshomatic.ObjLoader();
 			Meshomatic.MeshData md = o.LoadFile(objFile);
+			//BBox modelBounds = new BBox();
 			foreach (var item in md.Tris)
 			{
 				Point a = new Point(md.Vertices[item.P1.Vertex], md.TexCoords[item.P1.TexCoord], md.Normals[item.P1.Normal]);
 				Point b = new Point(md.Vertices[item.P2.Vertex], md.TexCoords[item.P2.TexCoord], md.Normals[item.P2.Normal]);
 				Point c = new Point(md.Vertices[item.P3.Vertex], md.TexCoords[item.P3.TexCoord], md.Normals[item.P3.Normal]);
-				shapes.Add(new Tri(a, b, c, new RGB(1, .4, .2)));
+				Tri t = new Tri(a, b, c, new RGB(1, .4, .2));
+				shapes.Add(t);
+				//BBox l = t.getBounds();
+				//modelBounds.expand(l);
 			}
 
-			shapes.Add(new Sphere(70, 230, 30, 20, 1, 1, 0));
-			////spheres[1] = new Sphere(3, 5, -5, 2, 0, 1, 0);
-			////spheres[1] = new Sphere(-4, 10, 0, 1, 0, 1, 0);
-			////spheres[2] = new Sphere(10, 10, 0, 3, 0, 0, 1);
-			////spheres[3] = new Sphere(-2, 10, -5, 2, 0, 1, 1);
-			//tris.Add(new Tri(new Point(3, 4, 0), new Point(3, -4, 0), new Point(6, -4, 0), new RGB(0, 1, 0)));
-			////tris[1] = new Tri(new Point(2,2, -5), new Point(5, 7, -5), new Point(12, 12, -5), new RGB(.5, 1, 1));
+			//Bounds ls = s.getBounds();
+			//modelBounds.expand(ls);
+
+			//modelBounds.print();
+
+			root = new Node();
+			root.bbox.members = shapes;
+			root.bbox.computeLimits();
+
+			medianSplit(root, 0);
+		}
+
+		const int MAX_OBJECTS = 12;
+		const int MAX_DEPTH = 2;
+		const int MAX_SPLIT_DEPTH = 31;
+
+		private void medianSplit(Node curNode, int depth)
+		{
+			if (curNode.bbox.members.Count <= MAX_OBJECTS)
+				return;
+			else if (depth >= MAX_SPLIT_DEPTH)
+				return;
+			else
+			{
+				double xdiff = curNode.bbox.xmax - curNode.bbox.xmin;
+				double ydiff = curNode.bbox.ymax - curNode.bbox.ymin;
+				double zdiff = curNode.bbox.zmax - curNode.bbox.zmin;
+
+				BBox bbox1;
+				BBox bbox2;
+
+				if (xdiff >= ydiff && xdiff >= zdiff)
+				{
+					double maxx1;
+					maxx1 = curNode.bbox.getMedian(RTApp.BBox.MEDIAN_DIRECTION.X, xdiff);
+					double minx2 = maxx1;
+					bbox1 = new BBox(curNode.bbox.xmin, curNode.bbox.ymin, curNode.bbox.zmin, maxx1, curNode.bbox.ymax, curNode.bbox.zmax);
+					bbox2 = new BBox(minx2, curNode.bbox.ymin, curNode.bbox.zmin, curNode.bbox.xmax, curNode.bbox.ymax, curNode.bbox.zmax);
+				}
+				else if (ydiff >= xdiff && ydiff >= zdiff)
+				{
+					double maxy1;
+					maxy1 = curNode.bbox.getMedian(RTApp.BBox.MEDIAN_DIRECTION.Y, ydiff);
+					double miny2 = maxy1;
+					bbox1 = new BBox(curNode.bbox.xmin, curNode.bbox.ymin, curNode.bbox.zmin, curNode.bbox.xmax, maxy1, curNode.bbox.zmax);
+					bbox2 = new BBox(curNode.bbox.xmin, miny2, curNode.bbox.zmin, curNode.bbox.xmax, curNode.bbox.ymax, curNode.bbox.zmax);
+				}
+				else
+				{
+					double maxz1;
+					maxz1 = curNode.bbox.getMedian(RTApp.BBox.MEDIAN_DIRECTION.Z, zdiff);
+					double minz2 = maxz1;
+					bbox1 = new BBox(curNode.bbox.xmin, curNode.bbox.ymin, curNode.bbox.zmin, curNode.bbox.xmax, curNode.bbox.ymax, maxz1);
+					bbox2 = new BBox(curNode.bbox.xmin, curNode.bbox.ymin, minz2, curNode.bbox.xmax, curNode.bbox.ymax, curNode.bbox.zmax);
+				}
+				foreach (var item in curNode.bbox.members)
+				{
+					if (bbox1.InBox(item))
+						bbox1.members.Add(item);
+					if (bbox2.InBox(item))
+						bbox2.members.Add(item);
+				}
+				curNode.bbox.members.Clear();
+				if (bbox1.members.Count > 0)
+				{
+					Node n = new Node();
+					n.bbox = bbox1;
+					curNode.children.Add(n);
+				}
+
+				if (bbox2.members.Count > 0)
+				{
+					Node n = new Node();
+					n.bbox = bbox2;
+					curNode.children.Add(n);
+				}
+
+				foreach (Node n in curNode.children)
+				{
+					medianSplit(n, depth+1);
+				}
+			}
 		}
 
 		internal System.Drawing.Bitmap GetRayTracedScene()
@@ -183,7 +264,7 @@ namespace RTApp
 					Point Pij = V.sumPV(PP.At, V.sumVV(V.vsMult(Cu, u), V.vsMult(Cv, v)));
 					RGB pixelColor = getColorAtPixel(i, j, Pij);
 					setPixelColor(i, j, pixelColor);
-					
+
 				}
 			}
 			return bitmap;
@@ -194,43 +275,46 @@ namespace RTApp
 		{
 			Point Ray = V.normalize(V.PDiff(Pij, PP.E));
 
-			int SI = -1;//sphereIndex
 			double T = double.PositiveInfinity;
-
-			//calculate T for each sphere
-			for (int k = 0; k < shapes.Count; k++)
+			List<BBox> bboxList = new List<BBox>();
+			root.getBoxIntersections(Ray, Pij, ref bboxList);
+			Shape winner = null;
+			foreach (BBox curBBox in bboxList)
 			{
-				if (shapes[k] is Sphere)
+				//calculate T for each sphere
+				foreach (Shape shape in curBBox.members)
 				{
-
-					double newT = shapes[k].IntersectDistance(Ray);
-					if (newT != double.PositiveInfinity)
+					if (shape is Tri)
 					{
-						T = newT;
-						SI = k;
-					}
-				}
-				if (shapes[k] is Tri)
-				{
-					//Calc T
-					double newT = shapes[k].IntersectDistance(Ray);
-					//Find intersection point at distance T
-					Point P = V.sumPV(PP.E, V.vsMult(newT, Ray));
+						//Calc T
+						double newT = shape.IntersectDistance(Ray);
+						//Find intersection point at distance T
+						Point P = V.sumPV(PP.E, V.vsMult(newT, Ray));
 
-					//Get barycentric coords for intersect point
-					Tri.UVW bc = (shapes[k] as Tri).getBarycentricCoordsAtPoint(P);
+						//Get barycentric coords for intersect point
+						Tri.UVW bc = (shape as Tri).getBarycentricCoordsAtPoint(P);
 
-					//See if intersect point is inside triangle
-					if ((bc.v >= 0) && (bc.w >= 0) && (bc.v + bc.w < 1.0))
-					{
-						//Closer than old T? Update T and index
-						if (newT < T)
+						//See if intersect point is inside triangle
+						if ((bc.v >= 0) && (bc.w >= 0) && (bc.v + bc.w < 1.0))
 						{
-							T = newT;
-							SI = k;
+							//Closer than old T? Update T and index
+							if (newT < T)
+							{
+								T = newT;
+								winner = shape;
+							}
 						}
 					}
-				}
+					else if (shape is Sphere)
+					{
+						double newT = shape.IntersectDistance(Ray);
+						if (newT != double.PositiveInfinity)
+						{
+							T = newT;
+							winner = shape;
+						}
+					}
+				}				
 			}
 			RGB colorAtPixel;
 			if (T != double.PositiveInfinity)
@@ -238,14 +322,14 @@ namespace RTApp
 				Point ColorMe = V.sumPV(PP.E, V.vsMult(T, Ray));
 				bool obs = obstructionBetween(PP.LS, ColorMe);
 				Point N;
-				if (shapes[SI] is Sphere)
-					N = V.normalize((shapes[SI] as Sphere).GetSphereNormal(ColorMe));
+				if (winner is Sphere)
+					N = V.normalize((winner as Sphere).GetSphereNormal(ColorMe));
 				else
-					N = (shapes[SI] as Tri).triNormal(ColorMe);
-				if (!obs)
-					colorAtPixel = getColorAtPoint(i, j, ColorMe, N, SI);
-				else
-					colorAtPixel = getAmbientColor(i, j, ColorMe, N, SI);
+					N = (winner as Tri).triNormal(ColorMe);
+				//if (!obs)
+				//	colorAtPixel = getColorAtPoint(i, j, ColorMe, N, winner);
+				//else
+					colorAtPixel = getAmbientColor(i, j, ColorMe, N, winner);
 			}
 			else
 				colorAtPixel = new RGB(0, 0, 0);
