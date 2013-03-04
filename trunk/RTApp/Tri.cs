@@ -4,11 +4,12 @@
 
 using System;
 using RTApp;
+using System.Collections.Generic;
 class Tri : Shape
 {
 
 	public int numPoints;
-	public Point[] pts = new Point[3];
+	public List<Point> pts = new List<Point>();
 
 	//cache these - the same every time we do barycentric coords
 	Point v0;
@@ -17,6 +18,9 @@ class Tri : Shape
 	double d01;
 	double d11;
 	double invDenom;
+
+	Point faceNormal = null;
+
 	public Tri()
 	{
 		numPoints = 0;
@@ -24,9 +28,9 @@ class Tri : Shape
 	public Tri(Point P1, Point P2, Point P3, RGB c)
 	{
 		numPoints = 0;
-		add(P1);
-		add(P2);
-		add(P3);
+		pts.Add(P1);
+		pts.Add(P2);
+		pts.Add(P3);
 		color = c;
 
 		v0 = V.PDiff(pts[1], pts[0]);
@@ -35,11 +39,26 @@ class Tri : Shape
 		d01 = V.dot(v0, v1);
 		d11 = V.dot(v1, v1);
 		invDenom = 1.0 / (d00 * d11 - d01 * d01);
-	}
 
-	public void add(Point P)
+		computeBounds();
+	}
+	public override void computeBounds()
 	{
-		pts[numPoints++] = P;
+		foreach (var item in pts)
+		{
+			if (item.x < bounds.xmin)
+				bounds.xmin = item.x;
+			if (item.x > bounds.xmax)
+				bounds.xmax = item.x;
+			if (item.y < bounds.ymin)
+				bounds.ymin = item.y;
+			if (item.y > bounds.ymax)
+				bounds.ymax = item.y;
+			if (item.z < bounds.zmin)
+				bounds.zmin = item.z;
+			if (item.z > bounds.zmax)
+				bounds.zmax = item.z;
+		}
 	}
 
 	public void SetColor(RGB c)
@@ -62,14 +81,14 @@ class Tri : Shape
 
 	public Point triNormal(Point P)
 	{
-		Point normal;
 		Point P1 = pts[0];
 		Point P2 = pts[1];
 		Point P3 = pts[2];
 		if (P == P1 || P == P2 || P == P3)
 		{
-			normal = V.normalize(V.cross(V.PDiff(P2, P1), V.PDiff(P3, P1)));
-			return normal;
+			if (faceNormal == null)
+				faceNormal = V.normalize(V.cross(V.PDiff(P2, P1), V.PDiff(P3, P1)));
+			return faceNormal;
 		}
 		UVW bc = getBarycentricCoordsAtPoint(P);
 
@@ -77,7 +96,7 @@ class Tri : Shape
 		Point N1 = V.vsMult(bc.u, new Point(P1.nx, P1.ny, P1.nz));
 		Point N2 = V.vsMult(bc.v, new Point(P2.nx, P2.ny, P2.nz));
 		Point N3 = V.vsMult(bc.w, new Point(P3.nx, P3.ny, P3.nz));
-		normal = V.sumVV(N3, V.sumVV(N1, N2));
+		Point normal = V.normalize(V.sumVV(N3, V.sumVV(N1, N2)));
 		//double cos = V.dot(P, normal);
 		//if (cos < 0)
 		//{
@@ -85,7 +104,7 @@ class Tri : Shape
 		//    normal.y *= -1;
 		//    normal.z *= -1;
 		//}
-		return V.normalize(normal);
+		return normal;
 	}
 
 	public struct UVW
@@ -94,6 +113,7 @@ class Tri : Shape
 		public double v;
 		public double w;
 	}
+	
 
 	public UVW getBarycentricCoordsAtPoint(Point P)
 	{
@@ -131,7 +151,12 @@ class Tri : Shape
 		Point N = triNormal(A);
 		double T = V.dot(N, V.PDiff(A, PP.E)) / V.dot(N, Ray);
 		return T;
-	} 
+	}
+
+	public override BBox getBounds()
+	{
+		return bounds;
+	}
 }
 
 
