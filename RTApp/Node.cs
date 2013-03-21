@@ -31,7 +31,7 @@ namespace RTApp
 			}
 		}
 
-		public void getBoxIntersections(Point Ray, Point O, ref List<BBox> list)
+		public void getBoxIntersections(Point Ray, Point O, List<BBox> list)
 		{
 			if (isLeaf(this))
 			{
@@ -44,7 +44,7 @@ namespace RTApp
 				{
 					foreach (var item in children)
 					{
-						item.getBoxIntersections(Ray, O, ref list);
+						item.getBoxIntersections(Ray, O, list);
 					}
 				}
 			}
