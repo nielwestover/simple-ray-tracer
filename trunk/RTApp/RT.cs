@@ -174,7 +174,6 @@ namespace RTApp
 		}
 
 		const int MAX_OBJECTS = 12;
-		const int MAX_DEPTH = 2;
 		const int MAX_SPLIT_DEPTH = 31;
 
 		private void medianSplit(Node curNode, int depth)
@@ -273,51 +272,59 @@ namespace RTApp
 
 		private RGB getColorAtPixel(int i, int j, Point Pij)
 		{
+			if (i == 200 && j == 200)
+				Debug.Print("yo");
 			Point Ray = V.normalize(V.PDiff(Pij, PP.E));
 
-			double T = double.PositiveInfinity;
+			double T = double.NegativeInfinity;
 			List<BBox> bboxList = new List<BBox>();
-			root.getBoxIntersections(Ray, Pij, ref bboxList);
+			root.getBoxIntersections(Ray, Pij, bboxList);
 			Shape winner = null;
 			foreach (BBox curBBox in bboxList)
 			{
 				//calculate T for each sphere
 				foreach (Shape shape in curBBox.members)
 				{
-					if (shape is Tri)
+					//if (shape.bounds.intersectsBox(Ray, Pij))
 					{
-						//Calc T
-						double newT = shape.IntersectDistance(Ray);
-						//Find intersection point at distance T
-						Point P = V.sumPV(PP.E, V.vsMult(newT, Ray));
 
-						//Get barycentric coords for intersect point
-						Tri.UVW bc = (shape as Tri).getBarycentricCoordsAtPoint(P);
 
-						//See if intersect point is inside triangle
-						if ((bc.v >= 0) && (bc.w >= 0) && (bc.v + bc.w < 1.0))
+						if (shape is Tri)
 						{
-							//Closer than old T? Update T and index
-							if (newT < T)
+							//Calc T
+							double newT = shape.IntersectDistance(Ray);
+							//Find intersection point at distance T
+							Point P = V.sumPV(PP.E, V.vsMult(newT, Ray));
+
+							//Get barycentric coords for intersect point
+							Tri.UVW bc = (shape as Tri).getBarycentricCoordsAtPoint(P);
+
+							//See if intersect point is inside triangle
+							if ((bc.v >= 0) && (bc.w >= 0) && (bc.v + bc.w < 1.0))
+							{
+								//Closer than old T? Update T and index
+								if (newT > T)
+								{
+									T = newT;
+									winner = shape;
+								}
+							}
+						}
+						else if (shape is Sphere)
+						{
+							double newT = shape.IntersectDistance(Ray);
+
+							if (newT != double.PositiveInfinity)
 							{
 								T = newT;
 								winner = shape;
 							}
 						}
 					}
-					else if (shape is Sphere)
-					{
-						double newT = shape.IntersectDistance(Ray);
-						if (newT != double.PositiveInfinity)
-						{
-							T = newT;
-							winner = shape;
-						}
-					}
 				}				
 			}
 			RGB colorAtPixel;
-			if (T != double.PositiveInfinity)
+			if (T != double.NegativeInfinity)
 			{
 				Point ColorMe = V.sumPV(PP.E, V.vsMult(T, Ray));
 				bool obs = obstructionBetween(PP.LS, ColorMe);

@@ -8,6 +8,8 @@ using System.Collections.Generic;
 class Tri : Shape
 {
 
+	const double eps = .0000001;
+
 	public int numPoints;
 	public List<Point> pts = new List<Point>();
 
@@ -47,17 +49,17 @@ class Tri : Shape
 		foreach (var item in pts)
 		{
 			if (item.x < bounds.xmin)
-				bounds.xmin = item.x;
+				bounds.xmin = item.x - eps;
 			if (item.x > bounds.xmax)
-				bounds.xmax = item.x;
+				bounds.xmax = item.x + eps;
 			if (item.y < bounds.ymin)
-				bounds.ymin = item.y;
+				bounds.ymin = item.y - eps;
 			if (item.y > bounds.ymax)
-				bounds.ymax = item.y;
+				bounds.ymax = item.y + eps;
 			if (item.z < bounds.zmin)
-				bounds.zmin = item.z;
+				bounds.zmin = item.z - eps;
 			if (item.z > bounds.zmax)
-				bounds.zmax = item.z;
+				bounds.zmax = item.z + eps;
 		}
 	}
 

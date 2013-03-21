@@ -32,17 +32,17 @@ namespace RTApp
 		internal void expand(BBox l)
 		{
 			if (l.xmin < xmin)
-				xmin = l.xmin;
+				xmin = l.xmin - eps;
 			if (l.ymin < ymin)
-				ymin = l.ymin;
+				ymin = l.ymin + eps;
 			if (l.zmin < zmin)
-				zmin = l.zmin;
+				zmin = l.zmin - eps;
 			if (l.xmax > xmax)
-				xmax = l.xmax;
+				xmax = l.xmax + eps;
 			if (l.ymax > ymax)
-				ymax = l.ymax;
+				ymax = l.ymax - eps;
 			if (l.zmax > zmax)
-				zmax = l.zmax;
+				zmax = l.zmax + eps;
 		}
 
 		public void computeLimits()
@@ -115,7 +115,7 @@ namespace RTApp
 					}
 				}
 			}
-			vals.Sort();
+			vals = vals.OrderByDescending(x => x).ToList();
 			int size = vals.Count;
 
 			double median;
