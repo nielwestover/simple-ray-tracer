@@ -46,7 +46,7 @@ namespace RTApp
 			IntPtr.Zero,
 			Int32Rect.Empty,
 			BitmapSizeOptions.FromEmptyOptions());
-			bitmap.Save("C:/Niel/obj/render.png");
+			bitmap.Save("C:/Niel/obj/renderbvh.png");
 
 // 			image2.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
 // 			bitmap2.GetHbitmap(),

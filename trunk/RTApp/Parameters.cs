@@ -2,8 +2,8 @@
 
 public static class PP
 {
-	public const double XRES = 400;
-	public const double YRES = 400;
+	public const double XRES = 75;
+	public const double YRES = 100;
 
 	public static Point Up = new Point(0, 1, 0);
 	

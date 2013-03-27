@@ -149,13 +149,14 @@ namespace RTApp
 		{
 			Meshomatic.ObjLoader o = new Meshomatic.ObjLoader();
 			Meshomatic.MeshData md = o.LoadFile(objFile);
+			int i = 0;
 			//BBox modelBounds = new BBox();
 			foreach (var item in md.Tris)
 			{
 				Point a = new Point(md.Vertices[item.P1.Vertex], md.TexCoords[item.P1.TexCoord], md.Normals[item.P1.Normal]);
 				Point b = new Point(md.Vertices[item.P2.Vertex], md.TexCoords[item.P2.TexCoord], md.Normals[item.P2.Normal]);
 				Point c = new Point(md.Vertices[item.P3.Vertex], md.TexCoords[item.P3.TexCoord], md.Normals[item.P3.Normal]);
-				Tri t = new Tri(a, b, c, new RGB(1, .4, .2));
+				Tri t = new Tri(a, b, c, new RGB(1, .4, .2), i++);
 				shapes.Add(t);
 				//BBox l = t.getBounds();
 				//modelBounds.expand(l);
@@ -178,6 +179,10 @@ namespace RTApp
 
 		private void medianSplit(Node curNode, int depth)
 		{
+			if (curNode.bbox.members.Any(n => (n as Tri).ID == 4434))
+			{
+				Debug.Print("Found at depth " + depth);
+			}
 			if (curNode.bbox.members.Count <= MAX_OBJECTS)
 				return;
 			else if (depth >= MAX_SPLIT_DEPTH)
@@ -190,11 +195,11 @@ namespace RTApp
 
 				BBox bbox1;
 				BBox bbox2;
-
+				BBox.MEDIAN_DIRECTION dir;
 				if (xdiff >= ydiff && xdiff >= zdiff)
 				{
 					double maxx1;
-					maxx1 = curNode.bbox.getMedian(RTApp.BBox.MEDIAN_DIRECTION.X, xdiff);
+					maxx1 = curNode.bbox.getMedian(dir = RTApp.BBox.MEDIAN_DIRECTION.X, xdiff);
 					double minx2 = maxx1;
 					bbox1 = new BBox(curNode.bbox.xmin, curNode.bbox.ymin, curNode.bbox.zmin, maxx1, curNode.bbox.ymax, curNode.bbox.zmax);
 					bbox2 = new BBox(minx2, curNode.bbox.ymin, curNode.bbox.zmin, curNode.bbox.xmax, curNode.bbox.ymax, curNode.bbox.zmax);
@@ -202,7 +207,7 @@ namespace RTApp
 				else if (ydiff >= xdiff && ydiff >= zdiff)
 				{
 					double maxy1;
-					maxy1 = curNode.bbox.getMedian(RTApp.BBox.MEDIAN_DIRECTION.Y, ydiff);
+					maxy1 = curNode.bbox.getMedian(dir = RTApp.BBox.MEDIAN_DIRECTION.Y, ydiff);
 					double miny2 = maxy1;
 					bbox1 = new BBox(curNode.bbox.xmin, curNode.bbox.ymin, curNode.bbox.zmin, curNode.bbox.xmax, maxy1, curNode.bbox.zmax);
 					bbox2 = new BBox(curNode.bbox.xmin, miny2, curNode.bbox.zmin, curNode.bbox.xmax, curNode.bbox.ymax, curNode.bbox.zmax);
@@ -210,17 +215,27 @@ namespace RTApp
 				else
 				{
 					double maxz1;
-					maxz1 = curNode.bbox.getMedian(RTApp.BBox.MEDIAN_DIRECTION.Z, zdiff);
+					maxz1 = curNode.bbox.getMedian(dir = RTApp.BBox.MEDIAN_DIRECTION.Z, zdiff);
 					double minz2 = maxz1;
 					bbox1 = new BBox(curNode.bbox.xmin, curNode.bbox.ymin, curNode.bbox.zmin, curNode.bbox.xmax, curNode.bbox.ymax, maxz1);
 					bbox2 = new BBox(curNode.bbox.xmin, curNode.bbox.ymin, minz2, curNode.bbox.xmax, curNode.bbox.ymax, curNode.bbox.zmax);
 				}
 				foreach (var item in curNode.bbox.members)
 				{
+					if ((item as Tri).ID == 4434)
+						Debug.Flush();
 					if (bbox1.InBox(item))
+					{
+						if ((item as Tri).ID == 4434)
+							Debug.Print(dir.ToString() + " 0" + " D" + depth);
 						bbox1.members.Add(item);
+					}
 					if (bbox2.InBox(item))
+					{
+						if ((item as Tri).ID == 4434)
+							Debug.Print(dir.ToString() + " 1" + " D" + depth);
 						bbox2.members.Add(item);
+					}
 				}
 				curNode.bbox.members.Clear();
 				if (bbox1.members.Count > 0)
@@ -255,7 +270,7 @@ namespace RTApp
 			for (int j = 0; j < PP.YRES; j++)
 			{
 				System.Console.WriteLine((j + 1) + " of " + PP.YRES);
-				bitmap.Save("C:/Niel/obj/render.png");
+				bitmap.Save("C:/Niel/obj/renderbvh.png");
 				for (int i = 0; i < PP.XRES; i++)
 				{
 					double Cu = ((2.0 * (double)i + 1.0) / (2.0 * PP.XRES) - .5) * PP.Lu;
@@ -272,11 +287,11 @@ namespace RTApp
 
 		private RGB getColorAtPixel(int i, int j, Point Pij)
 		{
-			if (i == 200 && j == 200)
-				Debug.Print("yo");
+			if (i == 40 && j == 11)
+				Debug.Print("YO GABBA GABBA");
 			Point Ray = V.normalize(V.PDiff(Pij, PP.E));
 
-			double T = double.NegativeInfinity;
+			double T = double.PositiveInfinity;
 			List<BBox> bboxList = new List<BBox>();
 			root.getBoxIntersections(Ray, Pij, bboxList);
 			Shape winner = null;
@@ -288,9 +303,10 @@ namespace RTApp
 					//if (shape.bounds.intersectsBox(Ray, Pij))
 					{
 
-
 						if (shape is Tri)
 						{
+							if (i == 40 && j == 11 && (shape as Tri).ID == 3817)
+								Debug.Print((shape as Tri).ID.ToString());
 							//Calc T
 							double newT = shape.IntersectDistance(Ray);
 							//Find intersection point at distance T
@@ -303,7 +319,7 @@ namespace RTApp
 							if ((bc.v >= 0) && (bc.w >= 0) && (bc.v + bc.w < 1.0))
 							{
 								//Closer than old T? Update T and index
-								if (newT > T)
+								if (newT < T)
 								{
 									T = newT;
 									winner = shape;
@@ -324,7 +340,7 @@ namespace RTApp
 				}				
 			}
 			RGB colorAtPixel;
-			if (T != double.NegativeInfinity)
+			if (T != double.PositiveInfinity)
 			{
 				Point ColorMe = V.sumPV(PP.E, V.vsMult(T, Ray));
 				bool obs = obstructionBetween(PP.LS, ColorMe);
@@ -333,9 +349,9 @@ namespace RTApp
 					N = V.normalize((winner as Sphere).GetSphereNormal(ColorMe));
 				else
 					N = (winner as Tri).triNormal(ColorMe);
-				//if (!obs)
-				//	colorAtPixel = getColorAtPoint(i, j, ColorMe, N, winner);
-				//else
+				if (!obs)
+					colorAtPixel = getColorAtPoint(i, j, ColorMe, N, winner);
+				else
 					colorAtPixel = getAmbientColor(i, j, ColorMe, N, winner);
 			}
 			else
