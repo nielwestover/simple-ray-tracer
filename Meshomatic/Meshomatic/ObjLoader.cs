@@ -105,8 +105,8 @@ Vector3[] p = points.ToArray();
 			for(int i = 2; i < ps.Length; i++) {
 				lastButOne = ps[i - 1];
 				lastButTwo = ps[i];
-				//Tri t = new Tri(start, lastButOne, lastButTwo);
-				Tri t = new Tri(start, lastButTwo, lastButOne);
+				Tri t = new Tri(start, lastButOne, lastButTwo);
+				//Tri t = new Tri(start, lastButTwo, lastButOne);
 				ts.Add(t);
 			}
 			return ts.ToArray();

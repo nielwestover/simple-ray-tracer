@@ -53,9 +53,9 @@ public class Point
 		z = point.Z;
 		u = tc.X;
 		v = tc.Y;
-		nx = -normal.X;
-		ny = -normal.Y;
-		nz = -normal.Z;
+		nx = normal.X;
+		ny = normal.Y;
+		nz = normal.Z;
 	}
 
 	public void Print()

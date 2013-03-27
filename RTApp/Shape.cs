@@ -7,7 +7,7 @@ namespace RTApp
 {
 	public class BBox
 	{
-		const double eps = .0000001;
+		const double eps = 0;//.0000001;
 	
 		public List<Shape> members = new List<Shape>();
 
@@ -34,13 +34,13 @@ namespace RTApp
 			if (l.xmin < xmin)
 				xmin = l.xmin - eps;
 			if (l.ymin < ymin)
-				ymin = l.ymin + eps;
+				ymin = l.ymin - eps;
 			if (l.zmin < zmin)
 				zmin = l.zmin - eps;
 			if (l.xmax > xmax)
 				xmax = l.xmax + eps;
 			if (l.ymax > ymax)
-				ymax = l.ymax - eps;
+				ymax = l.ymax + eps;
 			if (l.zmax > zmax)
 				zmax = l.zmax + eps;
 		}
@@ -115,7 +115,7 @@ namespace RTApp
 					}
 				}
 			}
-			vals = vals.OrderByDescending(x => x).ToList();
+			vals = vals.OrderBy(x => x).ToList();
 			int size = vals.Count;
 
 			double median;
@@ -147,9 +147,9 @@ namespace RTApp
 				double r = s.radius;
 				if (PointInBox(p))
 					return true;
-				if (s.bounds.xmin < xmax && s.bounds.xmax > xmin)
-					if (s.bounds.ymin < ymax && s.bounds.ymax > ymin)
-						if (s.bounds.zmin < zmax && s.bounds.zmax > zmin)
+				if (s.bounds.xmin <= xmax && s.bounds.xmax >= xmin)
+					if (s.bounds.ymin <= ymax && s.bounds.ymax >= ymin)
+						if (s.bounds.zmin <= zmax && s.bounds.zmax >= zmin)
 							return true;
 			}
 			else if (item is Tri)
@@ -160,9 +160,9 @@ namespace RTApp
 					if (PointInBox(pt))
 						return true;
 				}
-				if (t.bounds.xmin < xmax && t.bounds.xmax > xmin)
-					if (t.bounds.ymin < ymax && t.bounds.ymax > ymin)
-						if (t.bounds.zmin < zmax && t.bounds.zmax > zmin)
+				if (t.bounds.xmin <= xmax && t.bounds.xmax >= xmin)
+					if (t.bounds.ymin <= ymax && t.bounds.ymax >= ymin)
+						if (t.bounds.zmin <= zmax && t.bounds.zmax >= zmin)
 							return true;
 			}
 			return false;
@@ -170,56 +170,100 @@ namespace RTApp
 
 		public bool intersectsBox(Point origin, Point Ray)
 		{
-			double tnear = -100000;
-			double tfar = 100000;
-			if (Ray.x == 0 && (origin.x < xmin || origin.x > xmax))
-				return false;
-			double t1 = (xmin - origin.x) / Ray.x;
-			double t2 = (xmax - origin.x) / Ray.x;
-			if (t1 > t2)
+// 			double tnear = double.NegativeInfinity;
+// 			double tfar = double.PositiveInfinity;
+// 			if (Ray.x == 0 && (origin.x < xmin || origin.x > xmax))
+// 				return false;
+// 			double t1 = (xmin - origin.x) / Ray.x;
+// 			double t2 = (xmax - origin.x) / Ray.x;
+// 			if (t1 > t2)
+// 			{
+// 				double temp = t1;
+// 				t1 = t2;
+// 				t2 = temp;
+// 			}
+// 			if (t1 > tnear) tnear = t1;
+// 			if (t2 < tfar) tfar = t2;
+// 			if (tnear > tfar) return false;
+// 			if (tfar < 0) return false;
+// 
+// 			//same for Y direction;
+// 			if (Ray.y == 0 && (origin.y < ymin || origin.y > ymax))
+// 				return false;
+// 			t1 = (ymin - origin.y) / Ray.y;
+// 			t2 = (ymax - origin.y) / Ray.y;
+// 			if (t1 > t2)
+// 			{
+// 				double temp = t1;
+// 				t1 = t2;
+// 				t2 = temp;
+// 			}
+// 			if (t1 > tnear) tnear = t1;
+// 			if (t2 < tfar) tfar = t2;
+// 			if (tnear > tfar) return false;
+// 			if (tfar < 0) return false;
+// 
+// 			//same for Z direction;
+// 			if (Ray.z == 0 && (origin.z < zmin || origin.z > zmax))
+// 				return false;
+// 			t1 = (zmin - origin.z) / Ray.z;
+// 			t2 = (zmax - origin.z) / Ray.z;
+// 			if (t1 > t2)
+// 			{
+// 				double temp = t1;
+// 				t1 = t2;
+// 				t2 = temp;
+// 			}
+// 			if (t1 > tnear) tnear = t1;
+// 			if (t2 < tfar) tfar = t2;
+// 			if (tnear > tfar) return false;
+// 			if (tfar < 0) return false;
+// 
+// 			return true;
+			double tmin, tmax, tymin, tymax, tzmin, tzmax;
+			if (Ray.x >= 0)
 			{
-				double temp = t1;
-				t1 = t2;
-				t2 = temp;
+				tmin = (xmin - origin.x) / Ray.x;
+				tmax = (xmax - origin.x) / Ray.x;
 			}
-			if (t1 > tnear) tnear = t1;
-			if (t2 < tfar) tfar = t2;
-			if (tnear > tfar) return false;
-			if (tfar < 0) return false;
-
-			//same for Y direction;
-			if (Ray.y == 0 && (origin.y < ymin || origin.y > ymax))
-				return false;
-			t1 = (ymin - origin.y) / Ray.y;
-			t2 = (ymax - origin.y) / Ray.y;
-			if (t1 > t2)
+			else
 			{
-				double temp = t1;
-				t1 = t2;
-				t2 = temp;
+				tmin = (xmax - origin.x) / Ray.x;
+				tmax = (xmin - origin.x) / Ray.x;
 			}
-			if (t1 > tnear) tnear = t1;
-			if (t2 < tfar) tfar = t2;
-			if (tnear > tfar) return false;
-			if (tfar < 0) return false;
-
-			//same for Z direction;
-			if (Ray.z == 0 && (origin.z < zmin || origin.z > zmax))
-				return false;
-			t1 = (zmin - origin.z) / Ray.z;
-			t2 = (zmax - origin.z) / Ray.z;
-			if (t1 > t2)
+			if (Ray.y >= 0)
 			{
-				double temp = t1;
-				t1 = t2;
-				t2 = temp;
+				tymin = (ymin - origin.y) / Ray.y;
+				tymax = (ymax - origin.y) / Ray.y;
 			}
-			if (t1 > tnear) tnear = t1;
-			if (t2 < tfar) tfar = t2;
-			if (tnear > tfar) return false;
-			if (tfar < 0) return false;
-
-			return true;
+			else
+			{
+				tymin = (ymax - origin.y) / Ray.y;
+				tymax = (ymin - origin.y) / Ray.y;
+			}
+			if ((tmin > tymax) || (tymin > tmax))
+				return false;
+			if (tymin > tmin)
+				tmin = tymin;
+			if (tymax < tmax)
+				tmax = tymax;
+			if (Ray.z >= 0)
+			{
+				tzmin = (zmin - origin.z) / Ray.z;
+				tzmax = (zmax - origin.z) / Ray.z;
+			}
+			else
+			{
+				tzmin = (zmax - origin.z) / Ray.z;
+				tzmax = (zmin - origin.z) / Ray.z;
+			}
+			if ((tmin > tzmax) || (tzmin > tmax))
+				return false;
+			if (tzmin > tmin)
+				tmin = tzmin;
+			if (tzmax < tmax)
+				tmax = tzmax;
+			return ((tmin < double.PositiveInfinity) && (tmax > double.NegativeInfinity));
 		}
 
 		private bool PointInBox(Point p)

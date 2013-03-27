@@ -12,7 +12,7 @@ class Tri : Shape
 
 	public int numPoints;
 	public List<Point> pts = new List<Point>();
-
+	public int ID;
 	//cache these - the same every time we do barycentric coords
 	Point v0;
 	Point v1;
@@ -27,8 +27,9 @@ class Tri : Shape
 	{
 		numPoints = 0;
 	}
-	public Tri(Point P1, Point P2, Point P3, RGB c)
+	public Tri(Point P1, Point P2, Point P3, RGB c, int id = 0)
 	{
+		ID = id;
 		numPoints = 0;
 		pts.Add(P1);
 		pts.Add(P2);
