@@ -220,6 +220,7 @@ namespace RTApp
 // 			if (tfar < 0) return false;
 // 
 // 			return true;
+
 			double tmin, tmax, tymin, tymax, tzmin, tzmax;
 			if (Ray.x >= 0)
 			{
@@ -259,11 +260,27 @@ namespace RTApp
 			}
 			if ((tmin > tzmax) || (tzmin > tmax))
 				return false;
-			if (tzmin > tmin)
-				tmin = tzmin;
-			if (tzmax < tmax)
-				tmax = tzmax;
-			return ((tmin < double.PositiveInfinity) && (tmax > double.NegativeInfinity));
+			return true;
+
+// 			double tx1 = (xmin - Ray.x) / Ray.x;
+// 			double tx2 = (xmax - Ray.x) / Ray.x;
+// 
+// 			double tmin = Math.Min(tx1, tx2);
+// 			double tmax = Math.Max(tx1, tx2);
+// 
+// 			double ty1 = (ymin - Ray.y) / Ray.y;
+// 			double ty2 = (ymax - Ray.y) / Ray.y;
+// 
+// 			tmin = Math.Min(ty1, ty2);
+// 			tmax = Math.Max(ty1, ty2);
+// 
+// 			double tz1 = (zmin - Ray.z) / Ray.z;
+// 			double tz2 = (zmax - Ray.z) / Ray.z;
+// 
+// 			tmin = Math.Min(tz1, tz2);
+// 			tmax = Math.Max(tz1, tz2);
+// 
+// 			return tmax >= tmin;
 		}
 
 		private bool PointInBox(Point p)

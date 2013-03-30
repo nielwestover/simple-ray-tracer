@@ -32,13 +32,13 @@ namespace RTApp
 			sw.Start();
 
 			//RT rt = new RT("C:/Niel/obj/cello.obj");
-			RT rt = new RT("C:/Niel/obj/female elf-obj.obj");
+			//RT rt = new RT("C:/Niel/obj/female elf-obj.obj");
 			//RT rt = new RT("C:/Niel/obj/elf-test.obj");
 			//RT rt = new RT("C:/Niel/obj/test.obj");
-			//RT rt = new RT("C:/Niel/obj/teapot.obj");
+			RT rt = new RT("C:/Niel/obj/teapot.obj");
 			Bitmap bitmap = rt.GetRayTracedScene();
 
-			System.Console.WriteLine("Elapsed: " + sw.ElapsedMilliseconds/1000 + " s");
+			System.Console.WriteLine("Elapsed: " + (double)(sw.ElapsedMilliseconds/1000.0) + " s");
 			//Bitmap bitmap2 = rt.AntialiasedScene(3);
 
 			image.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
