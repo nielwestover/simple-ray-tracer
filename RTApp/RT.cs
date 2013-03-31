@@ -14,7 +14,7 @@ namespace RTApp
 	{
 		Node root = new Node();
 		List<Shape> shapes = new List<Shape>();
-		Bitmap bitmap = new Bitmap((int)PP.XRES, (int)PP.YRES);
+		Bitmap bitmap = new Bitmap(PP.TOTALXRES, PP.TOTALYRES);
 
 		bool obstructionBetween(Point A, Point ColorMe)
 		{
@@ -75,72 +75,80 @@ namespace RTApp
 			return false;
 		}
 
-		RGB getColorAtPoint(int i, int j, Point P, Point N, Shape shape, Point LS)
+		RGB getPhongColorAtPoint(int i, int j, Point P, Point N, Shape shape)
 		{
-			double r, g, b;
-			r = g = b = 0;
-		
-			Point L = V.normalize(V.PDiff(LS, P));
-			double LdotN = V.dot(L, N);
-			Point ACC = V.vsMult(2 * LdotN, N);
-			Point R = new Point(ACC.x - L.x, ACC.y - L.y, ACC.z - L.z);
-			double Ca = PP.ambient + (1 - PP.ambient) * LdotN;
-			double ACC2 = V.dot(V.normalize(R), V.normalize(V.PDiff(PP.E, P)));
-			double Cs = Math.Pow(ACC2, PP.Pexp);
+			double Ks = 1;
+			double Kd = .6;
+			double Ka = 0;
+			double alpha = 100;
+			RGB Ia = shape.color;
+			RGB Id = shape.color;
 
-			r += (Ca * shape.color.r + (1 - Ca * shape.color.r) * Cs);
-			g += (Ca * shape.color.g + (1 - Ca * shape.color.g) * Cs);
-			b += (Ca * shape.color.b + (1 - Ca * shape.color.b) * Cs);
-
-			return new RGB(r, g, b);
-
-		}
-
-		RGB getAmbientColor(int i, int j, Point P, Point N, Shape winner, Point LS)
-		{
-			Point L = V.normalize(V.PDiff(LS, P));
-			double LdotN = V.dot(L, N);
-			double Ca = PP.ambient + (1 - PP.ambient) * LdotN;
-			double newR = Ca * winner.color.r;
-			double newG = Ca * winner.color.g;
-			double newB = Ca * winner.color.b;
-			return new RGB(newR, newG, newB);
-		}
-
-		private System.Drawing.Bitmap antialias(int p)
-		{
-			Bitmap bitmap2 = new Bitmap(bitmap.Width, bitmap.Height);
-			for (int j = 0; j < PP.YRES; j++)
+			RGB final = Ka * Ia;
+			foreach (Point m in PP.Lights)
 			{
-				for (int i = 0; i < PP.XRES; i++)
+				Point Lm = V.normalize(V.PDiff(m, P));
+				double LmdotN = V.dot(Lm, N);
+				double TwoLmdotN = 2 * LmdotN;
+				Point TwoLmdotN_N = V.vsMult(TwoLmdotN, N);
+				Point Rm = V.normalize(V.sumVV(TwoLmdotN_N, V.vsMult(-1, Lm)));
+				Point E = V.normalize(V.PDiff(PP.E, P));
+				double RmdotV = V.dot(Rm, E);
+				if (LmdotN > 0)
 				{
-					//if (j == 400 && i == 400)
-					//	Debug.Print("stop");
-					int r = 0;
-					int g = 0;
-					int b = 0;
-					int colors = 0;
-					for (int m = 0; m < p; ++m)
-					{
-						for (int n = 0; n < p; ++n)
-						{
-							if (j + m < PP.XRES && i + n < PP.YRES)
-							{
-								Color c = bitmap.GetPixel(j + m, i + n);
-								r += c.R;
-								g += c.G;
-								b += c.B;
-								++colors;
-							}
-						}
-					}
-					r /= colors;
-					g /= colors;
-					b /= colors;
-					bitmap2.SetPixel(j, i, Color.FromArgb(r, g, b));
+					final += Kd * LmdotN * Id;
+				}
+				RGB white = new RGB(1,1,1);
+				if (RmdotV > 0)
+				{
+					final += Ks * Math.Pow(RmdotV, alpha) * white;
 				}
 			}
-			return bitmap2;
+
+			return final;
+
+		}
+
+// 		RGB getAmbientColor(int i, int j, Point P, Point N, Shape shape)
+// 		{
+// 			Point L = V.normalize(V.PDiff(LS, P));
+// 			double LdotN = V.dot(L, N);
+// 			double Ca = PP.ambient + (1 - PP.ambient) * LdotN;
+// 			double newR = Ca * winner.color.r;
+// 			double newG = Ca * winner.color.g;
+// 			double newB = Ca * winner.color.b;
+// 			return new RGB(newR, newG, newB);
+// 		}
+
+		private System.Drawing.Bitmap antialias(Bitmap rt)
+		{
+			int totalSamples = PP.samples * PP.samples;
+			Bitmap sampled = new Bitmap(PP.XRES, PP.YRES);
+			
+			int r, g, b;
+			for (int j = 0; j < PP.YRES; ++j)
+			{
+				for (int i = 0; i < PP.XRES; ++i)
+				{
+					r = g = b = 0;
+					for (int xsample = 0; xsample < PP.samples; ++xsample)
+					{
+						for (int ysample = 0; ysample < PP.samples; ++ysample)
+						{
+							Color pixel = rt.GetPixel(i * PP.samples + xsample, j * PP.samples + ysample);
+							r += pixel.R;
+							g += pixel.G;
+							b += pixel.B;
+
+						}
+					}
+					r /= totalSamples;
+					g /= totalSamples;
+					b /= totalSamples;
+					sampled.SetPixel(i, j, Color.FromArgb(r, g, b));
+				}
+			}
+			return sampled;
 		}
 
 		void setPixelColor(int x, int y, RGB color)
@@ -171,7 +179,7 @@ namespace RTApp
 				Point a = new Point(md.Vertices[item.P1.Vertex], md.TexCoords[item.P1.TexCoord], md.Normals[item.P1.Normal]);
 				Point b = new Point(md.Vertices[item.P2.Vertex], md.TexCoords[item.P2.TexCoord], md.Normals[item.P2.Normal]);
 				Point c = new Point(md.Vertices[item.P3.Vertex], md.TexCoords[item.P3.TexCoord], md.Normals[item.P3.Normal]);
-				Tri t = new Tri(a, b, c, new RGB(1, .4, .2), i++);
+				Tri t = new Tri(a, b, c, new RGB(1, 1, 1), i++);
 				shapes.Add(t);
 				//BBox l = t.getBounds();
 				//modelBounds.expand(l);
@@ -282,21 +290,20 @@ namespace RTApp
 			Point u = V.normalize(V.cross(w, PP.Up));
 			Point v = V.cross(u, w);
 
-			for (int j = 0; j < PP.YRES; j++)
+			for (int j = 0; j < PP.TOTALYRES; j++)
 			{
-				System.Console.WriteLine((j + 1) + " of " + PP.YRES);
-				bitmap.Save("C:/Niel/obj/renderbvh.png");
-				for (int i = 0; i < PP.XRES; i++)
+				if (j % 10 == 0)
+					System.Console.WriteLine(j + " of " + PP.TOTALYRES);
+				for (int i = 0; i < PP.TOTALXRES; i++)
 				{
-					double Cu = ((2.0 * (double)i + 1.0) / (2.0 * PP.XRES) - .5) * PP.Lu;
-					double Cv = -((2.0 * (double)j + 1.0) / (2.0 * PP.YRES) - .5) * PP.Lv;
+					double Cu = ((2.0 * (double)i + 1.0) / (2.0 * PP.TOTALXRES) - .5) * PP.Lu;
+					double Cv = -((2.0 * (double)j + 1.0) / (2.0 * PP.TOTALYRES) - .5) * PP.Lv;
 					Point Pij = V.sumPV(PP.At, V.sumVV(V.vsMult(Cu, u), V.vsMult(Cv, v)));
 					RGB pixelColor = getColorAtPixel(i, j, Pij);
 					setPixelColor(i, j, pixelColor);
-
 				}
 			}
-			return bitmap;
+			return antialias(bitmap);
 
 		}
 
@@ -358,30 +365,18 @@ namespace RTApp
 			if (T != double.PositiveInfinity)
 			{
 				Point ColorMe = V.sumPV(PP.E, V.vsMult(T, Ray));
-				foreach (Point LS in PP.Lights)
-				{
-					bool obs = obstructionBetween(LS, ColorMe);
-					Point N;
-					if (winner is Sphere)
-						N = V.normalize((winner as Sphere).GetSphereNormal(ColorMe));
-					else
-						N = (winner as Tri).triNormal(ColorMe);
-					if (!obs)
-						colorAtPixel += getColorAtPoint(i, j, ColorMe, N, winner, LS);
-					else
-						colorAtPixel += getAmbientColor(i, j, ColorMe, N, winner, LS);
-				}
+				//bool obs = obstructionBetween(LS, ColorMe);
+				Point N;
+				if (winner is Sphere)
+					N = V.normalize((winner as Sphere).GetSphereNormal(ColorMe));
+				else
+					N = (winner as Tri).triNormal(ColorMe);
+				//if (!obs)
+					colorAtPixel += getPhongColorAtPoint(i, j, ColorMe, N, winner);
+				//else
+				//	colorAtPixel += getAmbientColor(i, j, ColorMe, N, winner);
 			}
-			else
-				colorAtPixel = new RGB(0, 0, 0);
 			return colorAtPixel;
-		}
-
-
-
-		internal System.Drawing.Bitmap AntialiasedScene(int samples)
-		{
-			return antialias(samples);
 		}
 	}
 }
