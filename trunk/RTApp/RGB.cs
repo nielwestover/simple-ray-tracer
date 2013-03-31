@@ -35,9 +35,9 @@ public class RGB
 	{
 		return new RGB(a.r + b.r, a.g + b.g, a.b + b.b);
 	}
-	public static RGB operator *(RGB a, RGB b)
+	public static RGB operator *(double k, RGB I)
 	{
-		return new RGB(a.r * b.r, a.g * b.g, a.b * b.b);
+		return new RGB(k * I.r, k * I.g, k * I.b);
 	}
 
 	internal void Clamp()
@@ -48,5 +48,12 @@ public class RGB
 		if (g > 1) g = 1;
 		if (b < 0) b = 0;
 		if (b > 1) b = 1;
+	}
+
+	internal void Reset()
+	{
+		r = 0;
+		g = 0;
+		b = 0;
 	}
 }
