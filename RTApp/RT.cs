@@ -77,12 +77,13 @@ namespace RTApp
 
 		RGB getPhongColorAtPoint(int i, int j, Point P, Point N, Shape shape)
 		{
-			double Ks = 1;
-			double Kd = .6;
-			double Ka = 0;
-			double alpha = 100;
-			RGB Ia = shape.color;
-			RGB Id = shape.color;
+			double Ks = shape.Ks;//1
+			double Kd = shape.Kd;//.6
+			double Ka = shape.Ka;//0
+			double alpha = shape.phongExp;//100
+			RGB Ia = shape.Ia;
+			RGB Id = shape.Id;
+			RGB Is = shape.Is;
 
 			RGB final = Ka * Ia;
 			foreach (Point m in PP.Lights)
@@ -98,10 +99,9 @@ namespace RTApp
 				{
 					final += Kd * LmdotN * Id;
 				}
-				RGB white = new RGB(1,1,1);
 				if (RmdotV > 0)
 				{
-					final += Ks * Math.Pow(RmdotV, alpha) * white;
+					final += Ks * Math.Pow(RmdotV, alpha) * Is;
 				}
 			}
 
@@ -166,29 +166,43 @@ namespace RTApp
 		public RT(string objFile)
 		{
 			this.objFile = objFile;
+
+			LoadShapes();
 		}
 
 		private void LoadShapes()
 		{
-			Meshomatic.ObjLoader o = new Meshomatic.ObjLoader();
-			Meshomatic.MeshData md = o.LoadFile(objFile);
-			int i = 0;
-			//BBox modelBounds = new BBox();
-			foreach (var item in md.Tris)
-			{
-				Point a = new Point(md.Vertices[item.P1.Vertex], md.TexCoords[item.P1.TexCoord], md.Normals[item.P1.Normal]);
-				Point b = new Point(md.Vertices[item.P2.Vertex], md.TexCoords[item.P2.TexCoord], md.Normals[item.P2.Normal]);
-				Point c = new Point(md.Vertices[item.P3.Vertex], md.TexCoords[item.P3.TexCoord], md.Normals[item.P3.Normal]);
-				Tri t = new Tri(a, b, c, new RGB(1, 1, 1), i++);
-				shapes.Add(t);
-				//BBox l = t.getBounds();
-				//modelBounds.expand(l);
-			}
+// 			Meshomatic.ObjLoader o = new Meshomatic.ObjLoader();
+// 			Meshomatic.MeshData md = o.LoadFile(objFile);
+// 			int i = 0;
+// 			foreach (var item in md.Tris)
+// 			{
+// 				Point a = new Point(md.Vertices[item.P1.Vertex], md.TexCoords[item.P1.TexCoord], md.Normals[item.P1.Normal]);
+// 				Point b = new Point(md.Vertices[item.P2.Vertex], md.TexCoords[item.P2.TexCoord], md.Normals[item.P2.Normal]);
+// 				Point c = new Point(md.Vertices[item.P3.Vertex], md.TexCoords[item.P3.TexCoord], md.Normals[item.P3.Normal]);
+// 				Tri t = new Tri(a, b, c, new RGB(1, 1, 1), i++);
+// 				shapes.Add(t);
+// 			}
 
-			//Bounds ls = s.getBounds();
-			//modelBounds.expand(ls);
+			//shapes.Add(new Sphere(new Point(0, 0, 0), 10, new RGB(.4, .4, .4), new RGB(0, 0, 0), new RGB(0, 0, 0), 1, 1, 1, 2.9));
+			//shapes.Add(new Sphere(new Point(30, 0, 0), 10, new RGB(.4, .4, .4), new RGB(0, 0, 0), new RGB(.149, .149, .149), 1, 1, 1, 5));
+			//shapes.Add(new Sphere(new Point(60, 0, 0), 10, new RGB(.4, .4, .4), new RGB(0, 0, 0), new RGB(0.298, 0.298, 0.298), 1, 1, 1, 10));
+			//shapes.Add(new Sphere(new Point(90, 0, 0), 10, new RGB(.4, .4, .4), new RGB(0, 0, 0), new RGB(0.447, 0.447, 0.447), 1, 1, 1, 27));
+			//shapes.Add(new Sphere(new Point(120, 0, 0), 10, new RGB(.4, .4, .4), new RGB(0, 0, 0), new RGB(.6, .6, .6), 1, 1, 1, 200.1));
 
-			//modelBounds.print();
+			//shapes.Add(new Sphere(new Point(0, -60, 0), 10, new RGB(.4, .4, .4), new RGB(0, 0, 0), new RGB(0, 0, 0), 1, 1, 1, 2.9));
+			//shapes.Add(new Sphere(new Point(30, -60, 0), 10, new RGB(0.549, 0.549, 0.549), new RGB(0, 0, 0), new RGB(0, 0, 0), 1, 1, 1, 2.9));
+			//shapes.Add(new Sphere(new Point(60, -60, 0), 10, new RGB(0.698, 0.698, 0.698), new RGB(0, 0, 0), new RGB(0, 0, 0), 1, 1, 1, 5));
+			//shapes.Add(new Sphere(new Point(90, -60, 0), 10, new RGB(0.847, 0.847, 0.847), new RGB(0, 0, 0), new RGB(0, 0, 0), 1, 1, 1, 10));
+			//shapes.Add(new Sphere(new Point(120, -60, 0), 10, new RGB(1, 1, 1), new RGB(0, 0, 0), new RGB(0, 0, 0), 1, 1, 1, 27));
+
+			shapes.Add(new Sphere(new Point(0, 0, 0), 10, new RGB(0.039, 0.039, 0.039), new RGB(0.698, 0.698, 0.698), new RGB(0, 0, 0), 1, 1, 1, 200.1));
+			shapes.Add(new Sphere(new Point(30, 0, 0), 10, new RGB(0.898, .6, 0), new RGB(0.498, 0.498, 0), new RGB(0, 0, 0), 1, 1, 1, 120.1));
+			shapes.Add(new Sphere(new Point(60, 0, 0), 10, new RGB(0.4, 0, 0), new RGB(0.6, 0.098, 0.098), new RGB(0, 0, 0), 1, 1, 1, 100));
+
+			shapes.Add(new Sphere(new Point(0, -30, 0), 10, new RGB(.8, 0, 0), new RGB(0.8, 0.8, 0.8), new RGB(0, 0, 0), 1, 1, 1, 100));
+			shapes.Add(new Sphere(new Point(30, -30, 0), 10, new RGB(0, .8, 0), new RGB(0.8, 0.8, 0.8), new RGB(0, 0, 0), 1, 1, 1, 100));
+			shapes.Add(new Sphere(new Point(60, -30, 0), 10, new RGB(0, 0, .8), new RGB(0.8, 0.8, 0.8), new RGB(0, 0, 0), 1, 1, 1, 100));
 
 			root = new Node();
 			root.bbox.members = shapes;
@@ -284,7 +298,6 @@ namespace RTApp
 
 		internal System.Drawing.Bitmap GetRayTracedScene()
 		{
-			LoadShapes();
 
 			Point w = V.normalize(V.PDiff(PP.At, PP.E));
 			Point u = V.normalize(V.cross(w, PP.Up));
@@ -293,7 +306,7 @@ namespace RTApp
 			for (int j = 0; j < PP.TOTALYRES; j++)
 			{
 				if (j % 10 == 0)
-					System.Console.WriteLine(j + " of " + PP.TOTALYRES);
+					Debug.Print(j + " of " + PP.TOTALYRES);
 				for (int i = 0; i < PP.TOTALXRES; i++)
 				{
 					double Cu = ((2.0 * (double)i + 1.0) / (2.0 * PP.TOTALXRES) - .5) * PP.Lu;
@@ -376,6 +389,8 @@ namespace RTApp
 				//else
 				//	colorAtPixel += getAmbientColor(i, j, ColorMe, N, winner);
 			}
+			else
+				colorAtPixel = new RGB(1,1,1);
 			return colorAtPixel;
 		}
 	}
