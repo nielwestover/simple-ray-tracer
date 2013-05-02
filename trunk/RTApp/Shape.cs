@@ -7,7 +7,7 @@ namespace RTApp
 {
 	public class BBox
 	{
-		const double eps = 0;//.0000001;
+		const double eps = .0000001;
 	
 		public List<Shape> members = new List<Shape>();
 
@@ -291,8 +291,15 @@ namespace RTApp
 
 	public class Shape
 	{
-		public RGB color = new RGB();
 		public BBox bounds = new BBox();
+		public RGB Id = new RGB();
+		public RGB Ia = new RGB();
+		public RGB Is = new RGB();
+		public double Ks;
+		public double Kd;
+		public double Ka;
+		public double phongExp;
+		public double IOR;
 
 		public virtual double IntersectDistance(Point Ray)
 		{

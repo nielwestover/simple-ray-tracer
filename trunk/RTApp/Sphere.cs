@@ -19,21 +19,26 @@ class Sphere : Shape
 
 	}
 
-	public Sphere(double Xc, double Yc, double Zc, double rad, double r, double g, double b)
+	public Sphere(Point c, double rad, RGB diffuse, RGB specular, RGB ambient, double diffCo, double specCo, double ambCo, double phong)
 	{
-		center.x = Xc;
-		center.y = Yc;
-		center.z = Zc;
+		center = c;
 		radius = rad;
-		color.r = r;
-		color.g = g;
-		color.b = b;
+		Id = diffuse;
+		Is = specular;
+		Ia = ambient;
+		Kd = diffCo;
+		Ks = specCo;
+		Ka = ambCo;
+		phongExp = phong;
+
+		computeBounds();
 	}
 
 	public Point GetSphereNormal(Point P)
 	{
 		return new Point(P.x - center.x, P.y - center.y, P.z - center.z);
 	}
+
 	public override double IntersectDistance(Point Ray)
 	{
 		double T = double.PositiveInfinity;
@@ -58,7 +63,8 @@ class Sphere : Shape
 		}
 		return T;
 	}
-	public override BBox getBounds()
+
+	public override void computeBounds()
 	{
 		bounds.xmin = center.x - radius;
 		bounds.xmax = center.x + radius;
@@ -66,7 +72,5 @@ class Sphere : Shape
 		bounds.ymax = center.y + radius;
 		bounds.zmin = center.z - radius;
 		bounds.zmax = center.z + radius;
-
-		return bounds;
 	}
 }

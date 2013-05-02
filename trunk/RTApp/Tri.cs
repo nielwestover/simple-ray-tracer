@@ -34,7 +34,7 @@ class Tri : Shape
 		pts.Add(P1);
 		pts.Add(P2);
 		pts.Add(P3);
-		color = c;
+		Id = c;
 
 		v0 = V.PDiff(pts[1], pts[0]);
 		v1 = V.PDiff(pts[2], pts[0]);
