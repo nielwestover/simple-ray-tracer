@@ -18,7 +18,7 @@ static class V
 		return new Point(scalar * vec.x, scalar * vec.y, scalar * vec.z);
 	}
 
-	public static Point PDiff(Point A, Point B)//takes in 2 points, returns vector difference
+	public static  Point PDiff(Point A, Point B)//takes in 2 points, returns vector difference
 	{
 		return new Point(A.x - B.x, A.y - B.y, A.z - B.z);
 	}
