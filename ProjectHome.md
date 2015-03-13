@@ -1,0 +1,1 @@
+Creating a ray tracer to refresh my knowledge of graphics, vector math, and to just play around
